@@ -1,6 +1,6 @@
 javafiles = U.java Runner.java Dimensions.java Edges.java LayoutBox.java Rect.java Runner.java Layouter.java
 classfiles = $(javafiles:.java=.class)
-classpath = .:jsoup-1.8.1.jar
+classpath = .:jsoup-1.8.2.jar
 run_class = Runner
 
 all: $(classfiles)
@@ -21,4 +21,4 @@ fromwatch: all
 	@echo Watching for changes...
 
 run: all
-	java -cp .:jsoup-1.8.1.jar $(run_class)
+	java -cp .:jsoup-1.8.2.jar $(run_class)

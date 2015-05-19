@@ -13,10 +13,6 @@ public class Runner {
       // Clean the HTML
       Whitelist whitelist = Whitelist
       .relaxed()
-      .removeTags(
-        "col",
-        "colgroup",
-      )
       .addTags(
         "header",
         "nav",
@@ -30,6 +26,10 @@ public class Runner {
         "title",
         "time",
         "noscript"
+      )
+      .removeTags(
+        "col",
+        "colgroup"
       );
       html = Jsoup.clean(html, whitelist);
       
