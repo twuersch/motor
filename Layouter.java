@@ -9,7 +9,8 @@ import org.jsoup.nodes.TextNode;
 
 public class Layouter {
 
-  static final Set<String> blockElements = new HashSet<String>(Arrays.asList(new String[]{
+  static final Set<String> blockElements = new HashSet<>(
+    Arrays.asList(new String[]{
     "article",
     "aside",
     "blockquote",
@@ -41,38 +42,41 @@ public class Layouter {
     "ul"
   }));
 
-  static final Set<String> inlineElements = new HashSet<String>(Arrays.asList(new String[]{
-    "a",
-    "b",
-    "br",
-    "cite",
-    "code",
-    "dd",
-    "dt",
-    "em",
-    "i",
-    "img",
-    "input",
-    "q",
-    "small",
-    "span",
-    "strike",
-    "strong",
-    "sub",
-    "sup",
-    "td",
-    "th",
-    "time",
-    "u"
-  }));
+  static final Set<String> inlineElements = new HashSet<>(
+    Arrays.asList(new String[]{
+      "a",
+      "b",
+      "br",
+      "cite",
+      "code",
+      "dd",
+      "dt",
+      "em",
+      "i",
+      "img",
+      "input",
+      "q",
+      "small",
+      "span",
+      "strike",
+      "strong",
+      "sub",
+      "sup",
+      "td",
+      "th",
+      "time",
+      "u"
+    }));
 
-  public static LayoutBox layout(Node node) {
+  public static LayoutBox layout(Node node, int width) {
 
     /*
      * What happens here:
      *
-     * The elements of the document get translated into boxes on a two-dimensional space.
-     * All elements get positioned in block type elements. A sequence of inline elements gets wrapped in a
+     * The elements of the document get translated into boxes on a two-
+     * dimensional space.
+     * All elements get positioned in block type elements. A sequence of inline
+     * elements gets wrapped in a
      * block element as well.
      *
      * Some principles:
@@ -89,43 +93,105 @@ public class Layouter {
      * - Wrap sequences of inline elements in a block layout box.
      * - Calculate the width of each block layout box
      * - Lay out all children to be able to calculate their heights
-     * - Calculate the height of each block layout box by calculating and summing up the heights of its child boxes
-     * - If the child boxes are inline elements: Loop through all of them, measure each element's width, keep track of
-     *   the remaining space on the current line, keep track of the current's line y coordinate, and insert line
+     * - Calculate the height of each block layout box by calculating and
+     *   summing up the heights of its child boxes
+     * - If the child boxes are inline elements: Loop through all of them,
+     *   measure each element's width, keep track of
+     *   the remaining space on the current line, keep track of the current
+     *   line's y coordinate, and insert line
      *   breaks if there is not enough remaining space.
      *
      */
 
-    return buildLayoutTree(node);
+    LayoutBox rootLayoutBox = buildLayoutBoxes(node);
+    Dimensions dimensions = new Dimensions();
+    dimensions.content.width = 320;
+    dimensions.content.height = 480;
+    layout(rootLayoutBox, dimensions);
+    return rootLayoutBox;
   }
 
-  private static LayoutBox buildLayoutTree(Node node) {
+  private static LayoutBox buildLayoutBoxes(Node node) {
     // Determine whether this is a block or inline node.
-    LayoutBox.BoxType boxType = isInlineNode(node) ? LayoutBox.BoxType.Inline : LayoutBox.BoxType.Block;
+    LayoutBox.BoxType boxType = isInlineNode(node)
+      ? LayoutBox.BoxType.Inline
+      : LayoutBox.BoxType.Block;
 
     LayoutBox root = new LayoutBox(node, boxType);
     LayoutBox anonymousBox = null;
 
     for (Node child : node.childNodes()) {
-
       if (isInlineNode(child)) {
         if (anonymousBox == null) {
           anonymousBox = new LayoutBox(LayoutBox.BoxType.AnonymousBlock);
           root.children.add(anonymousBox);
         }
-        anonymousBox.children.add(buildLayoutTree(child));
+        anonymousBox.children.add(buildLayoutBoxes(child));
       } else {
         if (anonymousBox != null) {
           anonymousBox = null;
         }
-        root.children.add(buildLayoutTree(child));
+        root.children.add(buildLayoutBoxes(child));
       }
     }
-
     return root;
   }
 
+  private static void layout(LayoutBox layoutBox,
+                             Dimensions containerDimensions) {
+    if (layoutBox.boxType.equals(LayoutBox.BoxType.Block)
+      || layoutBox.boxType.equals(LayoutBox.BoxType.AnonymousBlock)) {
+      layoutBox.dimensions.content.width = calculateBlockWidth(layoutBox,
+        containerDimensions);
+      layoutBox.dimensions.content.coordinates
+        = calculateBlockPosition(layoutBox, containerDimensions);
+      for (LayoutBox child : layoutBox.children) {
+        layout(child, layoutBox.dimensions);
+        layoutBox.dimensions.content.height
+          = layoutBox.dimensions.content.height
+          + child.dimensions.content.height;
+      }
+    } else if (layoutBox.boxType.equals(LayoutBox.BoxType.Inline)) {
+      // TODO: Verify everything up to this point, and then continue here.
+      /*
+       * What happens here:
+       * - If we're at the start of a new line, calculate the total available
+       *   space
+       * - Calculate the width of each word in the inline element
+       * - Keep track of the remaining space
+       * - If there is no more space, create a new line by setting the y
+       *   coordinate accordingly, and resetting the available width
+       * - For simplifying, make each inline element a constand width and
+       *   height.
+       * - Think about what happens if there are block elements inside an inline
+       *   element.
+       *
+       */
+    }
+  }
+
+  private static int calculateBlockWidth(LayoutBox layoutBox,
+                                         Dimensions containerDimensions) {
+    return containerDimensions.content.width
+      - containerDimensions.padding.left
+      - containerDimensions.padding.right;
+  }
+
+  private static Coordinates calculateBlockPosition(
+    LayoutBox layoutBox,
+    Dimensions containerDimensions) {
+    // Note that at this point, all positions are calculated in absolute values.
+    int x = containerDimensions.content.coordinates.x
+      + layoutBox.dimensions.padding.left;
+    int y = containerDimensions.content.coordinates.y
+      + containerDimensions.content.height
+      + layoutBox.dimensions.padding.top;
+    return new Coordinates(x, y);
+  }
+
   private static boolean isInlineNode(Node node) {
-    return (node instanceof TextNode || node instanceof Element && inlineElements.contains(((Element) node).tagName()));
+    return (node instanceof TextNode
+      || node instanceof Element
+      && inlineElements.contains(((Element) node).tagName()));
   }
 }

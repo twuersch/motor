@@ -37,7 +37,7 @@ public class Runner {
       Document document = Jsoup.parse(html);
       
       // ...and do the layouting.
-      LayoutBox layoutDocument = Layouter.layout(document);
+      LayoutBox layoutDocument = Layouter.layout(document, 360);
       
     } catch (Exception exception) {
       // Catch all

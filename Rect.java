@@ -1,19 +1,22 @@
 public class Rect {
-  public int x, y, width, height;
+  public Coordinates coordinates;
+  public int width, height;
   
   public Rect() {
-    this.x = this.y = this.width = this.height = 0;
+    this.coordinates = new Coordinates();
+    this.coordinates.x = this.coordinates.y = this.width = this.height = 0;
   }
   
   public Rect(int x, int y) {
-    this.x = x;
-    this.y = y;
+    this.coordinates = new Coordinates();
+    this.coordinates.x = x;
+    this.coordinates.y = y;
     this.width = this.height = 0;
   }
   
   public Rect(int x, int y, int width, int height) {
-    this.x = x;
-    this.y = y;
+    this.coordinates.x = x;
+    this.coordinates.y = y;
     this.width = width;
     this.height = height;
   }
