@@ -1,4 +1,4 @@
-javafiles = U.java Runner.java Dimensions.java Edges.java LayoutBox_old.java Rect.java Runner.java Layouter.java
+javafiles = U.java Runner.java Dimensions.java Edges.java LayoutBox.java Rect.java Runner.java Layouter.java
 classfiles = $(javafiles:.java=.class)
 classpath = .:jsoup-1.8.2.jar
 run_class = Runner

@@ -24,4 +24,12 @@ public abstract class LayoutBox {
     }
     return string;
   }
+
+  public List<LayoutBox> children() {
+    return this.children;
+  }
+
+  public Dimensions dimensions() {
+    return this.dimensions;
+  }
 }
