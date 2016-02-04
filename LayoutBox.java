@@ -16,4 +16,12 @@ public abstract class LayoutBox {
     this.dimensions = new Dimensions();
     this.children = new Vector<LayoutBox>();
   }
+
+  public String toString() {
+    String string = this.getClass().toString();
+    if (this.node != null) {
+      string += " " + U.head(this.node.toString(), 100);
+    }
+    return string;
+  }
 }
