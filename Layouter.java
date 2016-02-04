@@ -68,7 +68,7 @@ public class Layouter {
       "u"
     }));
 
-  public static LayoutBox layout(Node node, int width) {
+  public static LayoutBox_old layout(Node node, int width) {
 
     /*
      * What happens here:
@@ -103,7 +103,7 @@ public class Layouter {
      *
      */
 
-    LayoutBox rootLayoutBox = buildLayoutBoxes(node);
+    LayoutBox_old rootLayoutBox = buildLayoutBoxes(node);
     Dimensions dimensions = new Dimensions();
     dimensions.content.width = 320;
     dimensions.content.height = 480;
@@ -111,19 +111,19 @@ public class Layouter {
     return rootLayoutBox;
   }
 
-  private static LayoutBox buildLayoutBoxes(Node node) {
+  private static LayoutBox_old buildLayoutBoxes(Node node) {
     // Determine whether this is a block or inline node.
-    LayoutBox.BoxType boxType = isInlineNode(node)
-      ? LayoutBox.BoxType.Inline
-      : LayoutBox.BoxType.Block;
+    LayoutBox_old.BoxType boxType = isInlineNode(node)
+      ? LayoutBox_old.BoxType.Inline
+      : LayoutBox_old.BoxType.Block;
 
-    LayoutBox root = new LayoutBox(node, boxType);
-    LayoutBox anonymousBox = null;
+    LayoutBox_old root = new LayoutBox_old(node, boxType);
+    LayoutBox_old anonymousBox = null;
 
     for (Node child : node.childNodes()) {
       if (isInlineNode(child)) {
         if (anonymousBox == null) {
-          anonymousBox = new LayoutBox(LayoutBox.BoxType.AnonymousBlock);
+          anonymousBox = new LayoutBox_old(LayoutBox_old.BoxType.AnonymousBlock);
           root.children.add(anonymousBox);
         }
         anonymousBox.children.add(buildLayoutBoxes(child));
@@ -137,21 +137,21 @@ public class Layouter {
     return root;
   }
 
-  private static void layout(LayoutBox layoutBox,
+  private static void layout(LayoutBox_old layoutBox,
                              Dimensions containerDimensions) {
-    if (layoutBox.boxType.equals(LayoutBox.BoxType.Block)
-      || layoutBox.boxType.equals(LayoutBox.BoxType.AnonymousBlock)) {
+    if (layoutBox.boxType.equals(LayoutBox_old.BoxType.Block)
+      || layoutBox.boxType.equals(LayoutBox_old.BoxType.AnonymousBlock)) {
       layoutBox.dimensions.content.width = calculateBlockWidth(layoutBox,
         containerDimensions);
       layoutBox.dimensions.content.coordinates
         = calculateBlockPosition(layoutBox, containerDimensions);
-      for (LayoutBox child : layoutBox.children) {
+      for (LayoutBox_old child : layoutBox.children) {
         layout(child, layoutBox.dimensions);
         layoutBox.dimensions.content.height
           = layoutBox.dimensions.content.height
           + child.dimensions.content.height;
       }
-    } else if (layoutBox.boxType.equals(LayoutBox.BoxType.Inline)) {
+    } else if (layoutBox.boxType.equals(LayoutBox_old.BoxType.Inline)) {
       // TODO: Verify everything up to this point, and then continue here.
       /*
        * What happens here:
@@ -170,7 +170,7 @@ public class Layouter {
     }
   }
 
-  private static int calculateBlockWidth(LayoutBox layoutBox,
+  private static int calculateBlockWidth(LayoutBox_old layoutBox,
                                          Dimensions containerDimensions) {
     return containerDimensions.content.width
       - containerDimensions.padding.left
@@ -178,7 +178,7 @@ public class Layouter {
   }
 
   private static Coordinates calculateBlockPosition(
-    LayoutBox layoutBox,
+    LayoutBox_old layoutBox,
     Dimensions containerDimensions) {
     // Note that at this point, all positions are calculated in absolute values.
     int x = containerDimensions.content.coordinates.x
