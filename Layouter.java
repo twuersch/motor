@@ -1,3 +1,18 @@
+/*
+
+Still feels far too complicated for what it does. I think I need:
+
+- Box with Position and Padding, in Block and Inline flavor
+(replaces all of LayoutBox, and no more separate anonymous block box type)
+- One single layout pass for the tree
+(At the moment, it's two: The first for creating the layout boxes, the second
+for calculating the layout)
+- A signature for the layouter more like: Box layout(Node node, Box parent)
+  (starting with an empty parent box with the screen width and no (?) associated node)
+  (or if parent == null, create screen width parent? Or another signature for that without the parent parameter?)
+- Question remains: Do boxes have nodes associated? I think yes, but if so, how do we start?
+
+ */
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -90,7 +105,7 @@ public class Layouter {
      * So:
      *
      * - Put each node into either a block or inline layout box.
-     * - Wrap sequences of inline elements in a block layout box.
+     * - Wrap sequences of inline elements in a (anonymous) block layout box.
      * - Calculate the width of each block layout box
      * - Lay out all children to be able to calculate their heights
      * - Calculate the height of each block layout box by calculating and
