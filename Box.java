@@ -34,6 +34,7 @@ public abstract class Box {
     this.size = size;
     this.padding = padding;
     this.node = node;
+    this.children = new Vector<Box>();
   }
 
   public String toString() {

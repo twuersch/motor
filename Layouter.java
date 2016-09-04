@@ -1,61 +1,62 @@
-/*
-
-Still feels far too complicated for what it does. I think I need:
-
-- Box with Position and Padding, in Block and Inline flavor
-(replaces all of LayoutBox, and no more separate anonymous block box type)
-- One single layout pass for the tree
-(At the moment, it's two: The first for creating the layout boxes, the second
-for calculating the layout)
-- A signature for the layouter more like: Box layout(Node node, Box parent)
-  (starting with an empty parent box with the screen width and no (?) associated node)
-  (or if parent == null, create screen width parent? Or another signature for that without the parent parameter?)
-- Question remains: Do boxes have nodes associated? I think yes, but if so, how do we start?
-
- */
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
+/**
+ * Created by timo on 2016-04-17.
+
+
+ Still feels far too complicated for what it does. I think I need:
+
+ - Box with Position and Padding, in Block and Inline flavor
+ (replaces all of LayoutBox, and no more separate anonymous block box type)
+ - One single layout pass for the tree
+ (At the moment, it's two: The first for creating the layout boxes, the second
+ for calculating the layout)
+ - A signature for the layouter more like: Box layout(Node node, Box parent)
+ (starting with an empty parent box with the screen width and no (?) associated node)
+ (or if parent == null, create screen width parent? Or another signature for that without the parent parameter?)
+ - Question remains: Do boxes have nodes associated? I think yes, but if so, how do we start?
+
+ */
 public class Layouter {
 
   static final Set<String> blockElements = new HashSet<>(
     Arrays.asList(new String[]{
-    "article",
-    "aside",
-    "blockquote",
-    "caption",
-    "div",
-    "dl",
-    "fieldset",
-    "footer",
-    "form",
-    "h1",
-    "h2",
-    "h3",
-    "h4",
-    "h5",
-    "h6",
-    "header",
-    "li",
-    "nav",
-    "noscript",
-    "ol",
-    "p",
-    "pre",
-    "section",
-    "table",
-    "tbody",
-    "tfoot",
-    "thead",
-    "tr",
-    "ul"
-  }));
+      "article",
+      "aside",
+      "blockquote",
+      "caption",
+      "div",
+      "dl",
+      "fieldset",
+      "footer",
+      "form",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "header",
+      "li",
+      "nav",
+      "noscript",
+      "ol",
+      "p",
+      "pre",
+      "section",
+      "table",
+      "tbody",
+      "tfoot",
+      "thead",
+      "tr",
+      "ul"
+    }));
 
   static final Set<String> inlineElements = new HashSet<>(
     Arrays.asList(new String[]{
@@ -83,8 +84,7 @@ public class Layouter {
       "u"
     }));
 
-  public static LayoutBox layout(Node node, int width) {
-
+  public static Box layout(Node node, Box parentBox) {
     /*
      * What happens here:
      *
@@ -118,94 +118,40 @@ public class Layouter {
      *
      */
 
-    LayoutBox rootLayoutBox = buildLayoutBoxes(node);
-    Dimensions dimensions = new Dimensions();
-    dimensions.content().width(320);
-    dimensions.content().height(480);
-    layout(rootLayoutBox, dimensions);
-    return rootLayoutBox;
-  }
+    Box box = isInlineNode(node) ? new InlineBox(node) : new BlockBox(node);
+    box.width(parentBox.width() - parentBox.leftPadding() - parentBox.rightPadding());
+    box.x(parentBox.x() + parentBox.leftPadding());
+    box.y(parentBox.y() + parentBox.topPadding());
 
-  private static LayoutBox buildLayoutBoxes(Node node) {
-
-    LayoutBox root = isInlineNode(node) ?
-      new InlineLayoutBox(node) :
-      new BlockLayoutBox(node);
-
-    LayoutBox anonymousBox = null;
-
+    // Lay out children
+    Box inlineWrapperBox = null;
     for (Node child : node.childNodes()) {
-      if (isInlineNode(child)) {
-        if (anonymousBox == null) {
-          anonymousBox = new AnonymousBlockLayoutBox(child);
-          root.children().add(anonymousBox);
+      if (isBlockNode(child)) {
+        if (inlineWrapperBox != null) {
+          inlineWrapperBox = null;
         }
-        anonymousBox.children().add(buildLayoutBoxes(child));
+        box.children().add(layout(child, box));
       } else {
-        if (anonymousBox != null) {
-          anonymousBox = null;
+        if (inlineWrapperBox == null) {
+          inlineWrapperBox = new BlockBox();
+          box.children().add(inlineWrapperBox);
         }
-        root.children().add(buildLayoutBoxes(child));
+        inlineWrapperBox.children().add(layout(child, inlineWrapperBox));
       }
     }
-    return root;
-  }
 
-  private static void layout(LayoutBox layoutBox,
-                             Dimensions containerDimensions) {
-    if (layoutBox instanceof BlockLayoutBox
-      || layoutBox instanceof AnonymousBlockLayoutBox) {
-      layoutBox.dimensions().content().width(calculateBlockWidth(layoutBox,
-        containerDimensions));
-      layoutBox.dimensions().content().coordinates(calculateBlockCoordinates(layoutBox,
-        containerDimensions));
-      for (LayoutBox child : layoutBox.children()) {
-        layout(child, layoutBox.dimensions());
-        layoutBox.dimensions().content().height(
-          layoutBox.dimensions().content().height()
-            + child.dimensions().content().height());
-      }
-    } else if (layoutBox instanceof InlineLayoutBox) {
-      // TODO: Verify everything up to this point, and then continue here.
-      /*
-       * What happens here:
-       * - If we're at the start of a new line, calculate the total available
-       *   space
-       * - Calculate the width of each word in the inline element
-       * - Keep track of the remaining space
-       * - If there is no more space, create a new line by setting the y
-       *   coordinate accordingly, and resetting the available width
-       * - For simplifying, make each inline element a constand width and
-       *   height.
-       * - Think about what happens if there are block elements inside an inline
-       *   element.
-       *
-       */
-    }
-  }
+    // TODO: Probably layout myself, part 2
 
-  private static int calculateBlockWidth(LayoutBox layoutBox,
-                                         Dimensions containerDimensions) {
-    return containerDimensions.content().width()
-      - containerDimensions.padding().left()
-      - containerDimensions.padding().right();
-  }
-
-  private static Position calculateBlockCoordinates(
-    LayoutBox layoutBox,
-    Dimensions containerDimensions) {
-    // Note that at this point, all positions are calculated in absolute values.
-    int x = containerDimensions.content().coordinates().x()
-      + layoutBox.dimensions().padding().left();
-    int y = containerDimensions.content().coordinates().y()
-      + containerDimensions.content().height()
-      + layoutBox.dimensions().padding().top();
-    return new Position(x, y);
+    return box;
   }
 
   private static boolean isInlineNode(Node node) {
     return (node instanceof TextNode
       || node instanceof Element
       && inlineElements.contains(((Element) node).tagName()));
+  }
+
+  private static boolean isBlockNode(Node node) {
+    return !isInlineNode(node);
   }
 }

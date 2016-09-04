@@ -7,7 +7,7 @@ public class Runner {
     try {
       
       // Read the example HTML file into a string
-      String html = U.readFile("simple.html");
+      String html = U.readFile("test.html");
       
       // Clean the HTML
       Whitelist whitelist = Whitelist
@@ -36,8 +36,10 @@ public class Runner {
       Document document = Jsoup.parse(html);
       
       // ...and do the layouting.
-      LayoutBox layoutDocument = Layouter.layout(document, 360);
-      
+      Box screen = new BlockBox(new Position(0, 0), new Size(360, 0));
+      Box laidOutDocument = Layouter.layout(document, screen);
+      System.out.println("done.");
+
     } catch (Exception exception) {
       // Catch all
       throw new RuntimeException(exception);
