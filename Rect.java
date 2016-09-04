@@ -1,41 +1,41 @@
 public final class Rect {
-  private final Coordinates coordinates;
+  private final Position position;
   private final int width;
   private final int height;
 
   public Rect() {
-    this.coordinates = new Coordinates(0, 0);
+    this.position = new Position(0, 0);
     this.width = 0;
     this.height = 0;
   }
 
   public Rect(int x, int y) {
-    this.coordinates = new Coordinates(x, y);
+    this.position = new Position(x, y);
     this.width = this.height = 0;
   }
 
   public Rect(int x, int y, int width, int height) {
-    this.coordinates = new Coordinates(x, y);
+    this.position = new Position(x, y);
     this.width = width;
     this.height = height;
   }
 
-  public Rect(Coordinates coordinates, int width, int height) {
-    this.coordinates = coordinates;
+  public Rect(Position position, int width, int height) {
+    this.position = position;
     this.width = width;
     this.height = height;
   }
 
-  public Coordinates coordinates() {
-    return this.coordinates;
+  public Position coordinates() {
+    return this.position;
   }
 
   public int x() {
-    return this.coordinates.x();
+    return this.position.x();
   }
 
   public int y() {
-    return this.coordinates.y();
+    return this.position.y();
   }
 
   public int width() {
@@ -46,23 +46,23 @@ public final class Rect {
     return this.height;
   }
 
-  public Rect coordinates(Coordinates coordinates) {
-    return new Rect(coordinates, this.width, this.height);
+  public Rect coordinates(Position position) {
+    return new Rect(position, this.width, this.height);
   }
 
   public Rect x(int x) {
-    return new Rect(new Coordinates(x, this.coordinates.y()), this.width, this.height);
+    return new Rect(new Position(x, this.position.y()), this.width, this.height);
   }
 
   public Rect y(int y) {
-    return new Rect(new Coordinates(this.coordinates.x(), y), this.width, this.height);
+    return new Rect(new Position(this.position.x(), y), this.width, this.height);
   }
 
   public Rect width(int width) {
-    return new Rect(this.coordinates, width, this.height);
+    return new Rect(this.position, width, this.height);
   }
 
   public Rect height(int height) {
-    return new Rect(this.coordinates, this.width, height);
+    return new Rect(this.position, this.width, height);
   }
 }

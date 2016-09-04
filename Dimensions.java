@@ -7,20 +7,20 @@
 public final class Dimensions {
 
   private final Rect content;
-  private final Edges padding;
+  private final Padding padding;
 
   public Dimensions(int x, int y, int width, int height, int topPadding, int rightPadding, int bottomPadding, int leftPadding) {
     this.content = new Rect(x, y, width, height);
-    this.padding = new Edges(topPadding, rightPadding, bottomPadding, leftPadding);
+    this.padding = new Padding(topPadding, rightPadding, bottomPadding, leftPadding);
   }
 
-  public Dimensions(Rect content, Edges padding) {
+  public Dimensions(Rect content, Padding padding) {
     this.content = content;
     this.padding = padding;
   }
 
   public Dimensions(Rect content) {
-    this(content, new Edges());
+    this(content, new Padding());
   }
 
   public Dimensions(int x, int y, int width, int height, int padding) {
@@ -43,7 +43,7 @@ public final class Dimensions {
     return this.content;
   }
 
-  public Edges padding() {
+  public Padding padding() {
     return this.padding;
   }
 
@@ -83,7 +83,7 @@ public final class Dimensions {
     return new Dimensions(content, this.padding);
   }
 
-  public Dimensions padding(Edges padding) {
+  public Dimensions padding(Padding padding) {
     return new Dimensions(this.content, padding);
   }
 

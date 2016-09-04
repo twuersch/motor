@@ -191,7 +191,7 @@ public class Layouter {
       - containerDimensions.padding().right();
   }
 
-  private static Coordinates calculateBlockCoordinates(
+  private static Position calculateBlockCoordinates(
     LayoutBox layoutBox,
     Dimensions containerDimensions) {
     // Note that at this point, all positions are calculated in absolute values.
@@ -200,7 +200,7 @@ public class Layouter {
     int y = containerDimensions.content().coordinates().y()
       + containerDimensions.content().height()
       + layoutBox.dimensions().padding().top();
-    return new Coordinates(x, y);
+    return new Position(x, y);
   }
 
   private static boolean isInlineNode(Node node) {
