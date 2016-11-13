@@ -59,4 +59,12 @@ public final class Padding {
   public Padding left(int left) {
     return new Padding(this.top, this.right, this.bottom, left);
   }
+
+  @Override
+  public String toString() {
+    return "t" + this.top
+      + " r" + this.right
+      + " b" + this.bottom
+      + " l" + this.left;
+  }
 }

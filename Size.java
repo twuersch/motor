@@ -23,11 +23,16 @@ public final class Size {
     return this.height;
   }
 
-  public Position width(int width) {
-    return new Position(width, this.height);
+  public Size width(int width) {
+    return new Size(width, this.height);
   }
 
-  public Position height(int height) {
-    return new Position(this.width, height);
+  public Size height(int height) {
+    return new Size(this.width, height);
+  }
+
+  @Override
+  public String toString() {
+    return "w" + this.width + " h" + this.height;
   }
 }

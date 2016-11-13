@@ -1,10 +1,9 @@
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by timo on 2016-04-17.
@@ -24,6 +23,10 @@ import java.util.Set;
 
  */
 public class Layouter {
+
+  private static int LINE_HEIGHT_PX = 20;
+  private static int CHARACTER_WIDTH_PX = 8;
+  private static int WORD_SPACING_PX = 5;
 
   static final Set<String> blockElements = new HashSet<>(
     Arrays.asList(new String[]{
@@ -85,6 +88,7 @@ public class Layouter {
     }));
 
   public static Box layout(Node node, Box parentBox) {
+
     /*
      * What happens here:
      *
@@ -118,34 +122,89 @@ public class Layouter {
      *
      */
 
+    // Skip HTML HEAD node
+    if (node instanceof Element && ((Element) node).tagName().equals("head")) return null;
+
+    // TODO: Think about this. Maybe it's too early to create an InlineBox here, depending only on the node type.
     Box box = isInlineNode(node) ? new InlineBox(node) : new BlockBox(node);
+    if (node instanceof Document) {
+      box.padding(new Padding(0));
+    }
     box.width(parentBox.width() - parentBox.leftPadding() - parentBox.rightPadding());
     box.x(parentBox.x() + parentBox.leftPadding());
     box.y(parentBox.y() + parentBox.topPadding());
 
     // Lay out children
     Box inlineWrapperBox = null;
-    for (Node child : node.childNodes()) {
-      if (isBlockNode(child)) {
+    for (Node childNode : node.childNodes()) {
+      if (isBlockNode(childNode)) {
         if (inlineWrapperBox != null) {
           inlineWrapperBox = null;
         }
-        box.children().add(layout(child, box));
+        Box childBox = layout(childNode, box);
+        if (childBox != null) {
+          box.children().add(childBox);
+        }
       } else {
         if (inlineWrapperBox == null) {
           inlineWrapperBox = new BlockBox();
+          inlineWrapperBox.width(parentBox.width());
           box.children().add(inlineWrapperBox);
         }
-        inlineWrapperBox.children().add(layout(child, inlineWrapperBox));
+        Box childBox = layout(childNode, inlineWrapperBox);
+        if (childBox != null) {
+          inlineWrapperBox.children().add(childBox);
+        }
       }
     }
 
     // TODO: Probably layout myself, part 2
 
+    if (isInlineNode(node)) {
+      int x = 0, y = 0; // Coordinates are relative to parent box
+      if (node instanceof TextNode) {
+        TextNode textNode = (TextNode) node;
+        ListIterator<String> words = new ArrayList<String>(
+          Arrays.asList(textNode.text().split("\\s+"))
+        ).listIterator();
+
+        // assert Boolean.TRUE;
+
+        // Position each word
+        while (words.hasNext()) {
+          String word = words.next();
+
+          // If the word does not fit onto the current line, do a line break
+          if (stringWidthPx(word) > box.width() - x) {  // Note that at the moment, we assume same-width characters
+            y += LINE_HEIGHT_PX;
+            box.height(box.height() + LINE_HEIGHT_PX);
+            x = 0;
+          }
+
+          // If, after a line break, the word still does not fit,
+          // break apart the beginning so that it fits
+          if (stringWidthPx(word) > box.width() - x) {
+            words.remove();
+            int splitIndex = (box.width() - x) / CHARACTER_WIDTH_PX;
+            words.add(word.substring(0, splitIndex));
+            words.add(word.substring(splitIndex));
+            words.previous();
+          }
+
+          // Position the word
+          x += word.length() * CHARACTER_WIDTH_PX;
+          // TODO: Add an inline box here? Actually, that's the decision to make: How is content represented?
+
+          // Add space after word
+          x += WORD_SPACING_PX;
+        }
+      }
+    }
+
     return box;
   }
 
-  private static boolean isInlineNode(Node node) {
+  public static boolean isInlineNode(Node node) {
     return (node instanceof TextNode
       || node instanceof Element
       && inlineElements.contains(((Element) node).tagName()));
@@ -153,5 +212,9 @@ public class Layouter {
 
   private static boolean isBlockNode(Node node) {
     return !isInlineNode(node);
+  }
+
+  private static int stringWidthPx(String string) {
+    return string.length() * CHARACTER_WIDTH_PX;
   }
 }

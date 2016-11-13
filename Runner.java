@@ -37,7 +37,9 @@ public class Runner {
       
       // ...and do the layouting.
       Box screen = new BlockBox(new Position(0, 0), new Size(360, 0));
+      screen.padding(new Padding(0));
       Box laidOutDocument = Layouter.layout(document, screen);
+      Renderer.render(laidOutDocument);
       System.out.println("done.");
 
     } catch (Exception exception) {

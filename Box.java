@@ -47,9 +47,15 @@ public abstract class Box {
 
   public Position position() { return this.position; }
 
+  public void position(Position position) { this.position = position; }
+
   public Size size() { return this.size; }
 
+  public void size(Size size) { this.size = size; }
+
   public Padding padding() { return this.padding; }
+
+  public void padding(Padding padding) { this.padding = padding; }
 
   public Node node() { return this.node; }
 
@@ -57,34 +63,34 @@ public abstract class Box {
   
   public int width() { return this.size().width(); }
   
-  public void width(int width) { this.size().width(width); }
+  public void width(int width) { this.size(this.size().width(width)); }
   
   public int height() { return this.size().height(); }
   
-  public void height(int height) { this.size().height(height); }
+  public void height(int height) { this.size(this.size().height(height)); }
   
   public int x() { return this.position().x(); }
 
-  public void x(int x) { this.position().x(x); }
+  public void x(int x) { this.position(this.position().x(x)); }
 
   public int y() { return this.position().y(); }
 
-  public void y(int y) { this.position().y(y); }
+  public void y(int y) { this.position(this.position().y(y)); }
   
   public int leftPadding() { return this.padding().left(); }
 
-  public void leftPadding(int leftPadding) { this.padding().left(leftPadding); }
+  public void leftPadding(int leftPadding) { this.padding(this.padding().left(leftPadding)); }
 
   public int rightPadding() { return this.padding().right(); }
 
-  public void rightPadding(int rightPadding) { this.padding().right(rightPadding); }
+  public void rightPadding(int rightPadding) { this.padding(this.padding().right(rightPadding)); }
 
   public int topPadding() { return this.padding().top(); }
 
-  public void topPadding(int topPadding) { this.padding().top(topPadding); }
+  public void topPadding(int topPadding) { this.padding(this.padding().top(topPadding)); }
 
   public int bottomPadding() { return this.padding().bottom(); }
 
-  public void bottomPadding(int bottomPadding) { this.padding().bottom(bottomPadding); }
+  public void bottomPadding(int bottomPadding) { this.padding(this.padding().bottom(bottomPadding)); }
 
 }

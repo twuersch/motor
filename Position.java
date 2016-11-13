@@ -27,4 +27,9 @@ public final class Position {
   public Position y(int y) {
     return new Position(this.x, y);
   }
+
+  @Override
+  public String toString() {
+    return "x" + this.x +" y" + this.y;
+  }
 }
