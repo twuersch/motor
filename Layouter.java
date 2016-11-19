@@ -160,6 +160,15 @@ public class Layouter {
 
     // TODO: Probably layout myself, part 2
 
+    /**
+     * A few notes
+     *
+     * - Layouting text nodes: I think for each text node, I'll need a list
+     *   of segments. Each segment is a line or a part of a line.
+     * - For bold, italic etc. tags, these need to set a flag (or increment a counter)
+     *   to be passed to the next recursion.
+     */
+
     if (isInlineNode(node)) {
       int x = 0, y = 0; // Coordinates are relative to parent box
       if (node instanceof TextNode) {
