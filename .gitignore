@@ -4,6 +4,7 @@
 *.class
 .DS_Store
 Thumbs.db
+lib/
 
 # IntelliJ specific
 .idea/
