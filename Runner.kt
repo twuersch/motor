@@ -4,6 +4,7 @@ import org.jsoup.safety.Whitelist
 /**
  * Created by timo on 16.12.16.
  */
+
 fun main(args: Array<String>) {
   // Read the example HTML file into a string
   var html: String = U.readFile("test.html")
@@ -41,7 +42,7 @@ fun main(args: Array<String>) {
     rightPadding = 0,
     bottomPadding = 0,
     leftPadding = 0)
-  val laidOutDocument = LayouterNew.layout(document, screen)
-  RendererNew.render(laidOutDocument)
+  val laidOutDocument = Layouter.layout(document, screen)
+  Renderer.render(laidOutDocument)
   System.out.println("done.")
 }

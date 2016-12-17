@@ -6,7 +6,7 @@ import org.jsoup.nodes.TextNode
 /**
  * Created by timo on 28.11.16.
  */
-object LayouterNew {
+object Layouter {
 
   val LINE_HEIGHT_PX: Int = 20
   val CHARACTER_WIDTH_PX: Int = 20
