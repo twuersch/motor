@@ -13,9 +13,11 @@ object Layouter {
   val WORD_SPACING_PX: Int = 5
 
   val BLOCK_ELEMENTS: List<String> = listOf(
+    "#root", // counts as a block element
     "article",
     "aside",
     "blockquote",
+    "body", // counts as a block element
     "caption",
     "div",
     "dl",
@@ -29,6 +31,7 @@ object Layouter {
     "h5",
     "h6",
     "header",
+    "html", // counts as a block element
     "li",
     "nav",
     "noscript",
@@ -106,54 +109,64 @@ object Layouter {
 
     var part: Part = EmptyPart
 
-    // Skip HTML HEAD node
-    if (node is Element && node.tagName().equals("head")) {
-      return part
-    }
-
-    if (isInlineNode(node)) {
-      val inlinePart = InlinePart(node = node)
-      inlinePart.x = parent.x
-      inlinePart.y = parent.y
-      part = inlinePart
-    } else if (isBlockNode(node)) {
-      val blockPart = BlockPart(node = node)
+    // Lay out block node
+    if (isBlockNode(node)) {
+      part = BlockPart(node = node)
 
       // Remove padding if root document
       if (node is Document) {
-        blockPart.topPadding = 0
-        blockPart.rightPadding = 0
-        blockPart.bottomPadding = 0
-        blockPart.leftPadding = 0
+        with(part) {
+          topPadding = 0
+          rightPadding = 0
+          bottomPadding = 0
+          leftPadding = 0
+        }
       }
 
-      blockPart.width = parent.width - parent.leftPadding - parent.rightPadding
-      blockPart.x = parent.x + parent.leftPadding
-      blockPart.y = parent.y + parent.topPadding
+      // Calculate width and coordinates
+      with(part) {
+        width = parent.width - parent.leftPadding - parent.rightPadding
+        x = parent.x + parent.leftPadding
+        y = parent.y + parent.topPadding
+      }
 
-      part = blockPart
-    }
+      // Lay out this block node's children
+      var inlineWrapperPart: Part = EmptyPart
+      for (childNode in node.childNodes()) {
 
-    // Lay out children
-    var inlineWrapperPart: Part = EmptyPart
-    for (childNode in node.childNodes()) {
-      if (isBlockNode(childNode)) {
-        if (inlineWrapperPart !is EmptyPart) inlineWrapperPart = EmptyPart
+        /* The distinction between block and child nodes at this point makes
+        * sure that each part contains only block parts or only inline parts
+        * by wrapping inline parts with anonymous block parts where necessary */
+
+        if (isBlockNode(childNode)) {
+          // Child is a block node, clear wrapper part
+          if (inlineWrapperPart !is EmptyPart) inlineWrapperPart = EmptyPart
+          val childPart = layout(childNode, part)
+          if (childPart != EmptyPart) part.children.add(childPart)
+        } else if (isInlineNode(childNode) || childNode is TextNode) {
+          // Child is an inline node, create wrapper part if necessary
+          if (inlineWrapperPart is EmptyPart) {
+            // Inline nodes have to be wrapped in an anonymous block part
+            inlineWrapperPart = AnonymousBlockPart(width = part.width, x = part.x, y = part.y)
+            part.children.add(inlineWrapperPart)
+          }
+          val childPart = layout(childNode, inlineWrapperPart)
+          if (childPart != EmptyPart) inlineWrapperPart.children.add(childPart)
+        }
+      }
+    } else if (isInlineNode(node)) {
+      part = InlinePart(node = node)
+
+      for (childNode in node.childNodes()) {
         val childPart = layout(childNode, part)
         if (childPart != EmptyPart) part.children.add(childPart)
-      } else {
-        if (inlineWrapperPart is EmptyPart) {
-          inlineWrapperPart = AnonymousBlockPart()
-          with(inlineWrapperPart) {
-            width = parent.width
-            x = parent.x
-            y = parent.y
-          }
-          part.children.add(inlineWrapperPart)
-        }
-        val childPart = layout(childNode, inlineWrapperPart)
-        if (childPart != EmptyPart) inlineWrapperPart.children.add(childPart)
       }
+    } else if (node is TextNode) {
+      part = TextPart(node = node, text = node.text())
+      /* TODO: Think about whether this 1:1 correspondence between nodes and parts
+      actually makes sense. A counterexample would be a text node which has to
+      be split up into multiple text parts
+      */
     }
 
     /*
@@ -165,22 +178,17 @@ object Layouter {
      *   to be passed to the next recursion.
      */
 
-    // TODO: Continue here
+    // TODO: Continue here. Have a look at "traversing the layout tree"
+    // in https://limpet.net/mbrubeck/2014/09/17/toy-layout-engine-6-block.html
 
     return part
   }
 
   fun isInlineNode(node: Node): Boolean {
-    if (node is TextNode) {
-      return true
-    } else if (node is Element) {
-      return INLINE_ELEMENTS.contains(node.tagName())
-    } else {
-      return false
-    }
+    return (node is Element) && INLINE_ELEMENTS.contains(node.tagName())
   }
 
   fun isBlockNode(node: Node): Boolean {
-    return !isInlineNode(node)
+    return ((node is Element) && BLOCK_ELEMENTS.contains(node.tagName()))
   }
 }

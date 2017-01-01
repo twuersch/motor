@@ -43,7 +43,7 @@ fun prettyPrintNode(node: Node, depth: Int) {
     if (node.text().matches(Regex("\\s+"))) {
       System.out.println("Whitespace")
     } else {
-      System.out.println("Text " + node.text())
+      System.out.println("Text '" + node.text() +"'")
     }
   } else if (node is Element) {
     if (Layouter.isInlineNode(node)) {

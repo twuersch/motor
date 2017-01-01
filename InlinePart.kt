@@ -15,8 +15,7 @@ class InlinePart (
   bottomPadding: Int = 5,
   leftPadding: Int = 5,
   children: MutableList<Part> = mutableListOf(),
-  val node: Node,
-  val offsetInNode: Int = -1
+  val node: Node
 ) : Part(
   x,
   y,
@@ -33,7 +32,7 @@ class InlinePart (
     if (node is Element) {
       additionalInfo += "tag " + node.tagName()
     } else if (node is TextNode) {
-      additionalInfo += "text " + U.head(node.text(), 40)
+      additionalInfo += "text '" + U.head(node.text(), 40) + "'"
     }
     val childrenCount = children.count()
     return "InlinePart x$x y$y w$width h$height c$childrenCount $additionalInfo"
