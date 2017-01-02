@@ -9,6 +9,31 @@ import org.jsoup.safety.Whitelist
  * Created by timo on 18.11.16.
  */
 
+val INLINE_ELEMENTS: List<String> = listOf(
+  "a",
+  "b",
+  "br",
+  "cite",
+  "code",
+  "dd",
+  "dt",
+  "em",
+  "i",
+  "img",
+  "input",
+  "q",
+  "small",
+  "span",
+  "strike",
+  "strong",
+  "sub",
+  "sup",
+  "td",
+  "th",
+  "time",
+  "u"
+)
+
 fun main(args: Array<String>) {
   var html: String = U.readFile("test.html")
   val whitelist: Whitelist = Whitelist
@@ -46,7 +71,7 @@ fun prettyPrintNode(node: Node, depth: Int) {
       System.out.println("Text '" + node.text() +"'")
     }
   } else if (node is Element) {
-    if (Layouter.isInlineNode(node)) {
+    if (isInlineNode(node)) {
       System.out.println("Inline Element " + node.tagName().toUpperCase())
     } else {
       System.out.println("Block Element " + node.tagName().toUpperCase())
@@ -56,4 +81,8 @@ fun prettyPrintNode(node: Node, depth: Int) {
   for (childNode in node.childNodes()) {
     prettyPrintNode(childNode, depth + 1)
   }
+}
+
+fun isInlineNode(node: Node): Boolean {
+  return (node is Element) && INLINE_ELEMENTS.contains(node.tagName())
 }

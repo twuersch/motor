@@ -2,7 +2,7 @@ import org.jsoup.Jsoup
 import org.jsoup.safety.Whitelist
 
 /**
- * Created by timo on 16.12.16.
+ * Created by timo on 02.01.17.
  */
 
 fun main(args: Array<String>) {
@@ -36,13 +36,16 @@ fun main(args: Array<String>) {
   val document = Jsoup.parse(html)
 
   // ...and do the layouting.
-  val screen: Part = AnonymousBlockPart(
+  val screen: AnonymousBlockTile = AnonymousBlockTile(
     width = 360,
     topPadding = 0,
     rightPadding = 0,
     bottomPadding = 0,
-    leftPadding = 0)
+    leftPadding = 0
+  )
   val laidOutDocument = Layouter.layout(document, screen)
-  Renderer.render(laidOutDocument)
+  for (tile in laidOutDocument) {
+    Renderer.render(tile)
+  }
   System.out.println("done.")
 }
