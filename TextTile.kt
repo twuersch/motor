@@ -9,7 +9,6 @@ class TextTile (
   width: Int = 0,
   height: Int = 0,
   val node: Node,
-  val offsetInNode: Int = -1,
   val text: String = ""
 ) : Tile (
   x,
