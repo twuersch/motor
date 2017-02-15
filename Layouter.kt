@@ -72,7 +72,7 @@ object Layouter {
   fun layout(node: Node, parentBlock: AnonymousBlockTile) : List<Tile> {
     val tiles: MutableList<Tile> = mutableListOf()
 
-    // What kind of node is it?
+    // What kind of node are we looking at?
     if (hasBlockTile(node)) {
       // Lay out block node.
 
@@ -98,17 +98,21 @@ object Layouter {
       }
 
       // Reset the cursor, in case there will be text tiles
-      S.resetCursor(blockTile.width - blockTile.leftPadding - blockTile.rightPadding)
+      TextLayoutState.resetCursor(blockTile.width - blockTile.leftPadding - blockTile.rightPadding)
 
       // Lay out this block node's children
       var wrapperTile: AnonymousBlockTile? = null
+      var BlockYOffset = blockTile.topPadding
       for (childNode in node.childNodes()) {
         if (hasBlockTile(childNode)) {
           // Child is a block node, clear wrapper tile
           if (wrapperTile != null) wrapperTile = null
 
-          // Lay out this block node's block children
-          blockTile.children.addAll(layout(childNode, blockTile))
+          // Lay out this block node's block child
+          val laidOutChildrenTiles = layout(childNode, blockTile)
+          val height = measureHeight(laidOutChildrenTiles)
+          // TODO: Measure height here; Set blockTile.height (or below)
+          blockTile.children.addAll(laidOutChildrenTiles)
         } else if (hasTextTile(childNode) || isFormatElement(childNode)) {
           // Child is an inline node, create wrapper tile if necessary
           if (wrapperTile == null) {
@@ -117,17 +121,37 @@ object Layouter {
               x = blockTile.x + blockTile.leftPadding,
               y = blockTile.y + blockTile.topPadding
             )
-            S.resetCursor(wrapperTile.width - wrapperTile.leftPadding - wrapperTile.rightPadding)
+            TextLayoutState.resetCursor(wrapperTile.width - wrapperTile.leftPadding - wrapperTile.rightPadding)
             blockTile.children.add(wrapperTile)
           }
 
           // Lay out this block node's text or formatting children
-          wrapperTile.children.addAll(layout(childNode, wrapperTile))
+          val laidOutChildrenTiles = layout(childNode, wrapperTile)
+
+          // Measure height
+          if (laidOutChildrenTiles.size > 0) {
+            var minY = Int.MAX_VALUE
+            var maxY = 0
+            for (tile in laidOutChildrenTiles) {
+              minY = Math.min(minY, tile.y)
+              maxY = Math.max(maxY, tile.y + tile.height)
+            }
+            wrapperTile.height = maxY - minY
+          }
+          wrapperTile.children.addAll(laidOutChildrenTiles)
+          val height = measureHeight(laidOutChildrenTiles)
         }
+        // TODO: at this point, the laid out children have heights. add to Y block offset.
       }
 
-      // TODO: Calculate block height here.
+      // Calculate block height. We know that the children are only block tiles at this point.
+      // TODO: Think about this. Still not sure whether this is the right place to do this.
+      var totalHeight = 0
+      for (tile in blockTile.children) {
+        totalHeight += tile.height
+      }
 
+      blockTile.height = totalHeight
       // Return laid out block node as a tile
       tiles.add(blockTile)
       return tiles
@@ -135,8 +159,7 @@ object Layouter {
       // Lay out text node.
 
       // Prologue
-      // TODO: There's still something wrong here. This is the wrong moment to calculate the remaining width, but when is it? Maybe set the cursor at the creation of a new block tile?
-      S.remainingWidthPx = parentBlock.width - parentBlock.leftPadding - parentBlock.rightPadding
+      TextLayoutState.remainingWidthPx = parentBlock.width - parentBlock.leftPadding - parentBlock.rightPadding
       var textTiles: MutableList<TextTile> = mutableListOf()
 
       // Iterate word by word
@@ -146,52 +169,58 @@ object Layouter {
 
         // Does the current word fit onto the line?
         val wordWidthPx = stringWidthPx(word)
-        if (wordWidthPx <= S.remainingWidthPx) {
+        if (wordWidthPx <= TextLayoutState.remainingWidthPx) {
           // Yes, position it
           val textTile = TextTile(
-            x = S.cursorX + parentBlock.x + parentBlock.leftPadding,
-            y = S.cursorY + parentBlock.y + parentBlock.topPadding,
+            x = TextLayoutState.cursorX + parentBlock.x + parentBlock.leftPadding,
+            y = TextLayoutState.cursorY + parentBlock.y + parentBlock.topPadding,
             width = wordWidthPx,
             height = LINE_HEIGHT_PX,
             node = node,
-            text = word
+            text = word,
+            bold = TextLayoutState.isBold(),
+            italic = TextLayoutState.isItalic()
           )
           textTiles.add(textTile)
-          S.moveCursorRightBy(wordWidthPx)
+          TextLayoutState.moveCursorRightBy(wordWidthPx)
         } else {
           // No, insert a line break
-          S.cursorX = 0
-          S.remainingWidthPx = parentBlock.width - parentBlock.leftPadding - parentBlock.rightPadding
-          S.cursorY += LINE_SPACING_PX
+          with (TextLayoutState) {
+            cursorX = 0
+            remainingWidthPx = parentBlock.width - parentBlock.leftPadding - parentBlock.rightPadding
+            cursorY += LINE_SPACING_PX
+          }
           // Does the word fit now?
-          if (wordWidthPx <= S.remainingWidthPx) {
+          if (wordWidthPx <= TextLayoutState.remainingWidthPx) {
             // Yes, position it
             val textTile = TextTile(
-              x = S.cursorX + parentBlock.x + parentBlock.leftPadding,
-              y = S.cursorY + parentBlock.y + parentBlock.topPadding,
+              x = TextLayoutState.cursorX + parentBlock.x + parentBlock.leftPadding,
+              y = TextLayoutState.cursorY + parentBlock.y + parentBlock.topPadding,
               width = wordWidthPx,
               height = LINE_HEIGHT_PX,
               node = node,
-              text = word
+              text = word,
+              bold = TextLayoutState.isBold(),
+              italic = TextLayoutState.isItalic()
             )
             textTiles.add(textTile)
-            S.moveCursorRightBy(wordWidthPx)
+            TextLayoutState.moveCursorRightBy(wordWidthPx)
           } else {
             // no, break it apart and loop again
-            val maxChars = Math.floor(S.remainingWidthPx.toDouble() / CHARACTER_WIDTH_PX.toDouble())
+            val maxChars = Math.floor(TextLayoutState.remainingWidthPx.toDouble() / CHARACTER_WIDTH_PX.toDouble())
             val leftPart = word.substring(0, maxChars.toInt())
             val rightPart = word.substring(maxChars.toInt())
             wordsIterator.remove() // Remove word which is too long
             wordsIterator.add(leftPart) // insert left part into the iterator
             wordsIterator.add(rightPart) // insert right part
             wordsIterator.previous() // rewind iterator...
-            wordsIterator.previous() // ...to point to left part. Iterate again.
+            wordsIterator.previous() // ...to point to left part.
           }
         }
 
         // Space between words, if possible
-        if (WORD_SPACING_PX <= S.remainingWidthPx) {
-          S.moveCursorRightBy(WORD_SPACING_PX)
+        if (WORD_SPACING_PX <= TextLayoutState.remainingWidthPx) {
+          TextLayoutState.moveCursorRightBy(WORD_SPACING_PX)
         }
       }
 
@@ -199,6 +228,21 @@ object Layouter {
       tiles.addAll(textTiles)
       return tiles
     } else if (isFormatElement(node)) {
+      val element = node as Element
+
+      // Which format element is it?
+      if (element.tagName() == "b") TextLayoutState.setBold() // bold
+      else if (element.tagName() == "i") TextLayoutState.setItalic() // italic
+
+      // Lay out children
+      for (childNode in node.childNodes()) {
+        tiles.addAll(layout(childNode, parentBlock))
+      }
+
+      // Unset formatting
+      if (element.tagName() == "b") TextLayoutState.unsetBold() // bold
+      else if (element.tagName() == "i") TextLayoutState.unsetItalic() // italic
+
       return tiles
     } else {
       return tiles
@@ -221,13 +265,21 @@ object Layouter {
     return string.length * CHARACTER_WIDTH_PX
   }
 
+  fun measureHeight(tiles: List<Tile>): Int {
+    val maxY = tiles.map{ tile -> tile.y + tile.height }.max() ?: 0
+    val minY = tiles.map{ tile -> tile.y}.min() ?: 0
+    return maxY - minY
+  }
+
   /**
-   * Captures the layouter state across iterations
+   * Captures the state for text layout
    */
-  object S {
+  object TextLayoutState {
     var cursorX: Int = 0 // relative to parent block tile
     var cursorY: Int = 0 // relative to parent block tile
     var remainingWidthPx: Int = 0
+    var bold: Int = 0 // Counter (not simple flag) to guard against bad nesting
+    var italic: Int = 0
 
     fun resetCursor(lineWidthPx: Int) {
       cursorX = 0
@@ -237,6 +289,30 @@ object Layouter {
     fun moveCursorRightBy(px: Int) {
       cursorX += px
       remainingWidthPx -= px
+    }
+
+    fun setBold() {
+      bold = bold + 1
+    }
+
+    fun unsetBold() {
+      bold = Math.max(0, bold - 1)
+    }
+
+    fun isBold(): Boolean {
+      return (bold > 0)
+    }
+
+    fun setItalic() {
+      italic = italic + 1
+    }
+
+    fun unsetItalic() {
+      italic = Math.max(0, italic - 1)
+    }
+
+    fun isItalic(): Boolean {
+      return (italic > 0)
     }
   }
 }

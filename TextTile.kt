@@ -9,7 +9,9 @@ class TextTile (
   width: Int = 0,
   height: Int = 0,
   val node: Node,
-  val text: String = ""
+  val text: String = "",
+  val bold: Boolean = false,
+  val italic: Boolean = false
 ) : Tile (
   x,
   y,
@@ -17,6 +19,9 @@ class TextTile (
   height
 ) {
   override fun toString(): String {
-    return "TextTile x$x y$y '$text'"
+    var additionalInfo = ""
+    if (bold) additionalInfo += "B "
+    if (italic) additionalInfo += "I "
+    return "TextTile x$x y$y w$width h$height '$text' $additionalInfo"
   }
 }
