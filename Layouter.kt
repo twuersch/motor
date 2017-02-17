@@ -69,8 +69,8 @@ object Layouter {
   val LINE_SPACING_PX = 20
   val WORD_SPACING_PX = 5
 
-  fun layout(node: Node, parentBlock: AnonymousBlockTile) : List<Tile> {
-    val tiles: MutableList<Tile> = mutableListOf()
+  fun layout(node: Node, parentBlock: AnonymousBlockTile) : Set<Tile> {
+    val tiles: MutableSet<Tile> = mutableSetOf()
 
     // What kind of node are we looking at?
     if (hasBlockTile(node)) {
@@ -255,13 +255,13 @@ object Layouter {
 
   data class Interval<out T>(val min: T, val max: T)
 
-  fun measureYExtent(tiles: List<Tile>): Interval<Int> {
+  fun measureYExtent(tiles: Set<Tile>): Interval<Int> {
     val minY = tiles.map{ tile -> tile.y}.min() ?: 0
     val maxY = tiles.map{ tile -> tile.y + tile.height }.max() ?: 0
     return Interval(minY, maxY)
   }
 
-  fun measureHeight(tiles: List<Tile>): Int {
+  fun measureHeight(tiles: Set<Tile>): Int {
     val yExtent = measureYExtent(tiles)
     return (yExtent.max - yExtent.min)
   }
