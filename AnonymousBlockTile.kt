@@ -6,10 +6,10 @@ open class AnonymousBlockTile (
   y: Int = 0,
   width: Int = 0,
   height: Int = 0,
-  var topPadding: Int = 5,
-  var rightPadding: Int = 5,
-  var bottomPadding: Int = 5,
-  var leftPadding: Int = 5,
+  var topPadding: Int = 0,
+  var rightPadding: Int = 0,
+  var bottomPadding: Int = 0,
+  var leftPadding: Int = 0,
   val children: MutableList<Tile> = mutableListOf()
 ) : Tile (
   x,

@@ -82,6 +82,7 @@ object Layouter {
       // Calculate width and coordinates
       with(blockTile) {
         width = parentBlock.width - parentBlock.leftPadding - parentBlock.rightPadding
+        height = blockTile.topPadding + blockTile.bottomPadding
         x = parentBlock.x + parentBlock.leftPadding
         y = parentBlock.y + parentBlock.topPadding
       }
@@ -102,24 +103,25 @@ object Layouter {
 
       // Lay out this block node's children
       var wrapperTile: AnonymousBlockTile? = null
-      var BlockYOffset = blockTile.topPadding
       for (childNode in node.childNodes()) {
         if (hasBlockTile(childNode)) {
           // Child is a block node, clear wrapper tile
-          if (wrapperTile != null) wrapperTile = null
+          if (wrapperTile != null) {
+            wrapperTile = null
+          }
 
           // Lay out this block node's block child
           val laidOutChildrenTiles = layout(childNode, blockTile)
-          val height = measureHeight(laidOutChildrenTiles)
-          // TODO: Measure height here; Set blockTile.height (or below)
           blockTile.children.addAll(laidOutChildrenTiles)
+          val height = measureHeight(laidOutChildrenTiles)
+          blockTile.height += height
         } else if (hasTextTile(childNode) || isFormatElement(childNode)) {
           // Child is an inline node, create wrapper tile if necessary
           if (wrapperTile == null) {
             wrapperTile = AnonymousBlockTile(
               width = blockTile.width - blockTile.leftPadding - blockTile.rightPadding,
               x = blockTile.x + blockTile.leftPadding,
-              y = blockTile.y + blockTile.topPadding
+              y = blockTile.y + blockTile.topPadding + blockTile.height
             )
             TextLayoutState.resetCursor(wrapperTile.width - wrapperTile.leftPadding - wrapperTile.rightPadding)
             blockTile.children.add(wrapperTile)
@@ -127,31 +129,17 @@ object Layouter {
 
           // Lay out this block node's text or formatting children
           val laidOutChildrenTiles = layout(childNode, wrapperTile)
-
-          // Measure height
-          if (laidOutChildrenTiles.size > 0) {
-            var minY = Int.MAX_VALUE
-            var maxY = 0
-            for (tile in laidOutChildrenTiles) {
-              minY = Math.min(minY, tile.y)
-              maxY = Math.max(maxY, tile.y + tile.height)
-            }
-            wrapperTile.height = maxY - minY
-          }
           wrapperTile.children.addAll(laidOutChildrenTiles)
-          val height = measureHeight(laidOutChildrenTiles)
+
+          // Grow wrapper tile and outer block tile by the same amount if needed
+          val childrenYExtent = measureYExtent(laidOutChildrenTiles)
+          if (childrenYExtent.max > wrapperTile.y + wrapperTile.height) {
+            wrapperTile.height += childrenYExtent.max - wrapperTile.y - wrapperTile.height
+            blockTile.height +=  childrenYExtent.max - wrapperTile.y - wrapperTile.height
+          }
         }
-        // TODO: at this point, the laid out children have heights. add to Y block offset.
       }
 
-      // Calculate block height. We know that the children are only block tiles at this point.
-      // TODO: Think about this. Still not sure whether this is the right place to do this.
-      var totalHeight = 0
-      for (tile in blockTile.children) {
-        totalHeight += tile.height
-      }
-
-      blockTile.height = totalHeight
       // Return laid out block node as a tile
       tiles.add(blockTile)
       return tiles
@@ -224,7 +212,7 @@ object Layouter {
         }
       }
 
-      // Return laid out text node as a tile
+      // Return laid out text node as TextTiles
       tiles.addAll(textTiles)
       return tiles
     } else if (isFormatElement(node)) {
@@ -265,10 +253,17 @@ object Layouter {
     return string.length * CHARACTER_WIDTH_PX
   }
 
-  fun measureHeight(tiles: List<Tile>): Int {
-    val maxY = tiles.map{ tile -> tile.y + tile.height }.max() ?: 0
+  data class Interval<out T>(val min: T, val max: T)
+
+  fun measureYExtent(tiles: List<Tile>): Interval<Int> {
     val minY = tiles.map{ tile -> tile.y}.min() ?: 0
-    return maxY - minY
+    val maxY = tiles.map{ tile -> tile.y + tile.height }.max() ?: 0
+    return Interval(minY, maxY)
+  }
+
+  fun measureHeight(tiles: List<Tile>): Int {
+    val yExtent = measureYExtent(tiles)
+    return (yExtent.max - yExtent.min)
   }
 
   /**
