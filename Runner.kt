@@ -45,7 +45,7 @@ fun main(args: Array<String>) {
   )
   val laidOutDocument = Layouter.layout(document, screen)
   for (tile in laidOutDocument) {
-    Renderer.render(tile)
+    ImageRenderer.render(tile)
   }
   System.out.println("done.")
 }
