@@ -5,6 +5,7 @@
 .DS_Store
 Thumbs.db
 lib/
+out.png
 
 # IntelliJ specific
 .idea/

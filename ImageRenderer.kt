@@ -1,5 +1,9 @@
+import java.awt.Color
 import java.awt.Font
+import java.awt.Toolkit
 import java.awt.image.BufferedImage
+import java.io.File
+import javax.imageio.ImageIO
 
 /**
  * Created by timo on 17.02.17.
@@ -11,32 +15,42 @@ object ImageRenderer {
     // Have a look here for reference: http://www.java2s.com/Code/Java/2D-Graphics-GUI/DrawanImageandsavetopng.htm
 
     // List all tiles, blocks and text separately
-    var blockTiles: MutableSet<Pair<AnonymousBlockTile, Int>> = mutableSetOf()
-    var textTiles: MutableSet<TextTile> = mutableSetOf()
-    _render(tile, 0, blockTiles, textTiles)
+    var tilesAndDepths: MutableSet<Pair<Tile, Int>> = mutableSetOf()
+    _render(tile, 0, tilesAndDepths)
 
     // Get dimensions
-    val width = Math.max(blockTiles.map{ it.first.x + it.first.width }.max() ?: 0, textTiles.map { it.x + it.width }.max() ?: 0)
-    val height = Math.max(blockTiles.map{ it.first.y + it.first.height }.max() ?: 0, textTiles.map { it.y + it.height }.max() ?: 0)
+    val width = tilesAndDepths.map{ it.first.x + it.first.width }.max() ?: 0
+    val height = tilesAndDepths.map{ it.first.y + it.first.height }.max() ?: 0
 
-    // Set up image
+    // Set up image and font
     val image = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
     val graphics = image.createGraphics()
-    val font = Font("Courier New", Font.PLAIN, 8)
+    val fontSize = (8 * Toolkit.getDefaultToolkit().screenResolution / 72.0).toInt()
+    val font = Font("Courier New", Font.PLAIN, fontSize)
+    graphics.font = font
 
+    // Loop 1: Blocks
+    for (tileAndDepth in tilesAndDepths) {
+      val tile = tileAndDepth.first
+      val depth = tileAndDepth.second
+      if (tile is AnonymousBlockTile) {
+        val rgbvalue = (1.0 - 0.1 * depth).toFloat()
+        graphics.color = Color(rgbvalue, rgbvalue, rgbvalue)
+        // TODO: probably graphics.fillRect
+      }
+    }
 
-
+    // Write image
+    ImageIO.write(image, "PNG", File("out.png"))
     println("ImageRenderer done.")
   }
 
-  fun _render(tile: Tile, depth: Int, blockTiles: MutableSet<Pair<AnonymousBlockTile, Int>>, textTiles: MutableSet<TextTile>) {
+  fun _render(tile: Tile, depth: Int, tilesAndDepths: MutableSet<Pair<Tile, Int>>) {
+    tilesAndDepths.add(Pair(tile, depth))
     if (tile is AnonymousBlockTile) {
-      blockTiles.add(Pair(tile, depth))
       for (child in tile.children) {
-        _render(child, depth + 1, blockTiles, textTiles)
+        _render(child, depth + 1, tilesAndDepths)
       }
-    } else if (tile is TextTile) {
-      textTiles.add(tile)
     }
   }
 }
