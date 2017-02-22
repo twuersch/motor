@@ -29,14 +29,24 @@ object ImageRenderer {
     val font = Font("Courier New", Font.PLAIN, fontSize)
     graphics.font = font
 
-    // Loop 1: Blocks
+    // Loop 1: Block tiles
     for (tileAndDepth in tilesAndDepths) {
       val tile = tileAndDepth.first
       val depth = tileAndDepth.second
       if (tile is AnonymousBlockTile) {
         val rgbvalue = (1.0 - 0.1 * depth).toFloat()
         graphics.color = Color(rgbvalue, rgbvalue, rgbvalue)
-        // TODO: probably graphics.fillRect
+        graphics.fillRect(tile.x, tile.y, tile.width, tile.height)
+      }
+    }
+
+    // Loop 2: Text tiles
+    for (tileAndDepth in tilesAndDepths) {
+      val tile = tileAndDepth.first
+      val depth = tileAndDepth.second
+      if (tile is TextTile) {
+        graphics.color = Color.BLACK
+        graphics.drawString(tile.text, tile.x, tile.y)
       }
     }
 

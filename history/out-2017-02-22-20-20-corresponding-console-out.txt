@@ -1,0 +1,107 @@
+BlockTile x0 y0 w360 h100 p0 c1 #root
+  BlockTile x0 y0 w360 h90 p0 c1 html
+    BlockTile x0 y0 w360 h80 p5 c7 body
+      BlockTile x5 y5 w350 h10 p5 c1 p
+        AnonymousBlockTile x10 y20 w340 h16 p0 c13
+          TextTile x10 y20 w0 h16 '' 
+          TextTile x15 y20 w40 h16 'There' 
+          TextTile x60 y20 w32 h16 'have' 
+          TextTile x97 y20 w32 h16 'been' 
+          TextTile x134 y20 w56 h16 'written' 
+          TextTile x195 y20 w32 h16 'many' 
+          TextTile x232 y20 w48 h16 'titles' 
+          TextTile x285 y20 w16 h16 'in' 
+          TextTile x306 y20 w0 h16 '' 
+          TextTile x311 y20 w40 h16 'human' 
+          TextTile x356 y20 w56 h16 'history' 
+          TextTile x417 y20 w8 h16 '.' 
+          TextTile x430 y20 w0 h16 '' 
+      AnonymousBlockTile x5 y25 w350 h16 p0 c2
+        TextTile x5 y25 w0 h16 '' 
+        TextTile x10 y25 w0 h16 '' 
+      BlockTile x5 y5 w350 h10 p5 c1 p
+        AnonymousBlockTile x10 y20 w340 h36 p0 c28
+          TextTile x10 y20 w0 h16 '' 
+          TextTile x15 y20 w32 h16 'This' 
+          TextTile x52 y20 w16 h16 'is' 
+          TextTile x73 y20 w8 h16 'a' 
+          TextTile x86 y20 w48 h16 'little' 
+          TextTile x139 y20 w80 h16 'paragraph,' 
+          TextTile x224 y20 w32 h16 'with' 
+          TextTile x261 y20 w32 h16 'some' 
+          TextTile x10 y40 w88 h16 'nonsensical' 
+          TextTile x103 y40 w0 h16 '' 
+          TextTile x108 y40 w32 h16 'bold' B 
+          TextTile x145 y40 w48 h16 '(twice' B I 
+          TextTile x198 y40 w24 h16 'and' B I 
+          TextTile x227 y40 w56 h16 'italic)' B I 
+          TextTile x288 y40 w0 h16 '' 
+          TextTile x293 y40 w32 h16 'text' 
+          TextTile x330 y40 w16 h16 'in' 
+          TextTile x351 y40 w24 h16 'it.' 
+          TextTile x380 y40 w0 h16 '' 
+          TextTile x385 y40 w0 h16 '' 
+          TextTile x390 y40 w24 h16 'And' 
+          TextTile x419 y40 w40 h16 'after' 
+          TextTile x464 y40 w32 h16 'this' 
+          TextTile x501 y40 w24 h16 'new' 
+          TextTile x530 y40 w40 h16 'line,' 
+          TextTile x575 y40 w8 h16 'a' 
+          TextTile x588 y40 w40 h16 'list:' 
+          TextTile x633 y40 w0 h16 '' 
+      AnonymousBlockTile x5 y35 w350 h36 p0 c2
+        TextTile x5 y55 w0 h16 '' 
+        TextTile x10 y55 w0 h16 '' 
+      BlockTile x5 y5 w350 h40 p5 c7 ul
+        AnonymousBlockTile x10 y20 w340 h36 p0 c2
+          TextTile x10 y40 w0 h16 '' 
+          TextTile x15 y40 w0 h16 '' 
+        BlockTile x10 y10 w340 h10 p5 c1 li
+          AnonymousBlockTile x15 y25 w330 h36 p0 c2
+            TextTile x15 y45 w48 h16 'First,' 
+            TextTile x68 y45 w40 h16 'this.' 
+        AnonymousBlockTile x10 y30 w340 h36 p0 c2
+          TextTile x10 y50 w0 h16 '' 
+          TextTile x15 y50 w0 h16 '' 
+        BlockTile x10 y10 w340 h10 p5 c1 li
+          AnonymousBlockTile x15 y25 w330 h36 p0 c5
+            TextTile x15 y45 w24 h16 'And' 
+            TextTile x44 y45 w40 h16 'then,' 
+            TextTile x89 y45 w56 h16 'another' 
+            TextTile x150 y45 w16 h16 'of' 
+            TextTile x171 y45 w48 h16 'these.' 
+        AnonymousBlockTile x10 y40 w340 h36 p0 c2
+          TextTile x10 y60 w0 h16 '' 
+          TextTile x15 y60 w0 h16 '' 
+        BlockTile x10 y10 w340 h10 p5 c1 li
+          AnonymousBlockTile x15 y25 w330 h36 p0 c7
+            TextTile x15 y45 w24 h16 'And' 
+            TextTile x44 y45 w40 h16 'last,' 
+            TextTile x89 y45 w0 h16 '' 
+            TextTile x94 y45 w32 h16 'some' 
+            TextTile x131 y45 w16 h16 'of' 
+            TextTile x152 y45 w32 h16 'that' 
+            TextTile x189 y45 w8 h16 '.' 
+        AnonymousBlockTile x10 y50 w340 h36 p0 c2
+          TextTile x10 y70 w0 h16 '' 
+          TextTile x15 y70 w0 h16 '' 
+      AnonymousBlockTile x5 y75 w350 h36 p0 c2
+        TextTile x5 y95 w0 h16 '' 
+        TextTile x10 y95 w0 h16 '' 
+      BlockTile x5 y5 w350 h10 p5 c1 p
+        AnonymousBlockTile x10 y20 w340 h216 p0 c15
+          TextTile x10 y40 w0 h16 '' 
+          TextTile x15 y40 w24 h16 'And' 
+          TextTile x44 y40 w40 h16 'here,' 
+          TextTile x89 y40 w8 h16 'a' 
+          TextTile x102 y40 w32 h16 'word' 
+          TextTile x139 y40 w48 h16 'that's' 
+          TextTile x192 y40 w48 h16 'faaaar' 
+          TextTile x245 y40 w24 h16 'too' 
+          TextTile x274 y40 w40 h16 'long:' 
+          TextTile x10 y80 w336 h16 'Loremipsumdolorsitamet,consecteturadipisci' 
+          TextTile x10 y120 w336 h16 'ngelit.Sedvelpellentesquetellus,eupulvinar' 
+          TextTile x10 y160 w336 h16 'massa.Phasellusfermentumerosquissemornare,' 
+          TextTile x10 y200 w336 h16 'idconsequatnunctempor.Integervelitdolor,vi' 
+          TextTile x10 y220 w264 h16 'verraetsuscipita,gravidasedlorem.' 
+          TextTile x279 y220 w0 h16 '' 
