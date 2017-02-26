@@ -4,7 +4,7 @@
 open class AnonymousBlockTile (
   x: Int = 0,
   y: Int = 0,
-  width: Int = 0,
+  width: Int = 0,   // Note that width and height _include_ the padding.
   height: Int = 0,
   var topPadding: Int = 0,
   var rightPadding: Int = 0,
@@ -27,5 +27,17 @@ open class AnonymousBlockTile (
     else
       "p$topPadding $rightPadding $bottomPadding $leftPadding"
     return "AnonymousBlockTile x$x y$y w$width h$height $paddingInfo c$childrenCount"
+  }
+
+  fun contentHeight(): Int {
+    return height - topPadding - bottomPadding
+  }
+
+  fun contentHeight(contentHeight: Int): Unit {
+    height = contentHeight + topPadding + bottomPadding
+  }
+
+  fun growContentHeight(amount: Int) : Unit {
+    contentHeight(contentHeight() + amount)
   }
 }

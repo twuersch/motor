@@ -7,8 +7,8 @@ import org.jsoup.nodes.Node
 class BlockTile (
   x: Int = 0,
   y: Int = 0,
-  width: Int = 0,
-  height: Int = 0,
+  width: Int = 10,
+  height: Int = 10,
   topPadding: Int = 5,
   rightPadding: Int = 5,
   bottomPadding: Int = 5,
