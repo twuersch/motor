@@ -1,0 +1,17 @@
+BlockTile x0 y0 w360 h350 p5 c1 #root
+  BlockTile x5 y5 w350 h340 p5 c1 html
+    BlockTile x10 y10 w340 h330 p5 c4 body
+      BlockTile x15 y15 w330 h50 p5 c1 p
+        AnonymousBlockTile x0 y20 w320 h40 p0 c0
+      BlockTile x15 y55 w330 h70 p5 c1 p
+        AnonymousBlockTile x0 y60 w320 h60 p0 c0
+      BlockTile x15 y115 w330 h100 p5 c4 ul
+        AnonymousBlockTile x0 y120 w320 h20 p0 c0
+        BlockTile x20 y140 w320 h30 p5 c1 li
+          AnonymousBlockTile x0 y145 w310 h20 p0 c0
+        BlockTile x20 y160 w320 h30 p5 c1 li
+          AnonymousBlockTile x0 y165 w310 h20 p0 c0
+        BlockTile x20 y180 w320 h30 p5 c1 li
+          AnonymousBlockTile x0 y185 w310 h20 p0 c0
+      BlockTile x15 y205 w330 h130 p5 c1 p
+        AnonymousBlockTile x0 y210 w320 h120 p0 c0

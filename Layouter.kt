@@ -117,8 +117,8 @@ object Layouter {
     - Set my content height
     - Grow parent content height by my own height ((1)....or here)
      */
-    val childrenTilesHeight = measureHeight(blockTile.children)
-    blockTile.contentHeight(childrenTilesHeight)
+    val childrenTilesHeight = measureHeight(blockTile.children) // TODO: This might not even be necessary...
+    blockTile.contentHeight(childrenTilesHeight) // TODO:...because the text tiles grow the parent blocks from the inside out.
     parentBlock.growContentHeight(blockTile.contentHeight())
   }
 
@@ -224,7 +224,7 @@ object Layouter {
    * Captures the state for text layout
    */
   object TextLayoutState {
-    var textTiles: MutableList<TextTile> = mutableListOf() // This holds the text tiles we're creating in a text block
+    var textTiles: MutableList<Tile> = mutableListOf() // This holds the text tiles we're creating in a text block
     var wrapperBlock: AnonymousBlockTile? = null
     var parentBlock: AnonymousBlockTile? = null
     var cursorX = 0 // relative to wrapper block tile
@@ -249,7 +249,8 @@ object Layouter {
       textTiles = mutableListOf()
       val wrapperBlock = AnonymousBlockTile(
         width = parentBlock.width - parentBlock.leftPadding - parentBlock.rightPadding,
-        y = parentBlock.y + parentBlock.height - parentBlock.bottomPadding
+        y = parentBlock.y + parentBlock.height - parentBlock.bottomPadding,
+        children = textTiles
       )
       TextLayoutState.wrapperBlock = wrapperBlock
       parentBlock.children.add(wrapperBlock)
