@@ -5,7 +5,7 @@
 .DS_Store
 Thumbs.db
 lib/
-out.png
+.gradle/
 
 # IntelliJ specific
 .idea/

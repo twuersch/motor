@@ -3,6 +3,8 @@ import java.awt.Font
 import java.awt.Toolkit
 import java.awt.image.BufferedImage
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.imageio.ImageIO
 
 /**
@@ -51,7 +53,8 @@ object ImageRenderer {
     }
 
     // Write image
-    ImageIO.write(image, "PNG", File("out.png"))
+    val dateString = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(Calendar.getInstance().time)
+    ImageIO.write(image, "PNG", File("out-" + dateString + ".png"))
     println("ImageRenderer done.")
   }
 

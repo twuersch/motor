@@ -37,7 +37,7 @@ open class AnonymousBlockTile (
     height = contentHeight + topPadding + bottomPadding
   }
 
-  fun growContentHeight(amount: Int) : Unit {
+  fun growContentHeight(amount: Int) {
     contentHeight(contentHeight() + amount)
   }
 }

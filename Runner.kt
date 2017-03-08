@@ -43,8 +43,8 @@ fun main(args: Array<String>) {
     bottomPadding = 0,
     leftPadding = 0
   )
-  val laidOutDocument = Layouter.layout(document, screen)
-  for (tile in laidOutDocument) {
+  Layouter.layout(document, screen)
+  for (tile in screen.children) {
     ImageRenderer.render(tile)
   }
   System.out.println("done.")
