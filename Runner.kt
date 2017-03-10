@@ -45,7 +45,7 @@ fun main(args: Array<String>) {
   )
   Layouter.layout(document, screen)
   for (tile in screen.children) {
-    // ConsoleRenderer.render(tile)
+    ConsoleRenderer.render(tile)
     ImageRenderer.render(tile)
   }
   System.out.println("done.")

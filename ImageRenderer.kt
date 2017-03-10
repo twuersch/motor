@@ -12,7 +12,7 @@ import javax.imageio.ImageIO
  */
 object ImageRenderer {
 
-  fun render(tile: Tile) {
+  fun render(tile: Tile, renderText: Boolean = true, renderTextBlocks: Boolean = true) {
 
     // Have a look here for reference: http://www.java2s.com/Code/Java/2D-Graphics-GUI/DrawanImageandsavetopng.htm
 
@@ -29,6 +29,7 @@ object ImageRenderer {
     val graphics = image.createGraphics()
     val fontSize = (8 * Toolkit.getDefaultToolkit().screenResolution / 72.0).toInt()
     val font = Font("Courier New", Font.PLAIN, fontSize)
+    val ascent = graphics.getFontMetrics(font).ascent
     graphics.font = font
 
     // Loop 1: Block tiles
@@ -36,8 +37,7 @@ object ImageRenderer {
       val tile = tileAndDepth.first
       val depth = tileAndDepth.second
       if (tile is AnonymousBlockTile) {
-        val rgbvalue = (1.0 - 0.1 * depth).toFloat()
-        graphics.color = Color(rgbvalue, rgbvalue, rgbvalue)
+        graphics.color = depthToGrey(depth)
         graphics.fillRect(tile.x, tile.y, tile.width, tile.height)
       }
     }
@@ -47,8 +47,14 @@ object ImageRenderer {
       val tile = tileAndDepth.first
       val depth = tileAndDepth.second
       if (tile is TextTile) {
-        graphics.color = Color.BLACK
-        graphics.drawString(tile.text, tile.x, tile.y)
+        if (renderTextBlocks){
+          graphics.color = depthToGrey(depth)
+          graphics.fillRect(tile.x, tile.y, tile.width, tile.height)
+        }
+        if (renderText) {
+          graphics.color = Color.BLACK
+          graphics.drawString(tile.text, tile.x, tile.y + ascent)
+        }
       }
     }
 
@@ -65,5 +71,10 @@ object ImageRenderer {
         _render(child, depth + 1, tilesAndDepths)
       }
     }
+  }
+
+  fun depthToGrey(depth: Int) : Color {
+    val rgbvalue = (1.0 - 0.06 * depth).toFloat()
+    return Color(rgbvalue, rgbvalue, rgbvalue)
   }
 }

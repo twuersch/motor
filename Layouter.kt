@@ -144,6 +144,8 @@ object Layouter {
         // Yes, position the word (growing the container if it's the first word on the line)
         if (TextLayoutState.lineEmpty) TextLayoutState.growContentHeight(LINE_SPACING_PX)
         TextLayoutState.addTextTile(word, node)
+        // Space between words, if possible
+        if (WORD_SPACING_PX <= TextLayoutState.remainingWidthPx) TextLayoutState.moveCursorRightBy(WORD_SPACING_PX)
       } else {
         // No, insert a line break
         TextLayoutState.newline()
@@ -153,6 +155,8 @@ object Layouter {
           // Yes, position the word (growing the container if it's the first word on the line)
           if (TextLayoutState.lineEmpty) TextLayoutState.growContentHeight(LINE_SPACING_PX)
           TextLayoutState.addTextTile(word, node)
+          // Space between words, if possible
+          if (WORD_SPACING_PX <= TextLayoutState.remainingWidthPx) TextLayoutState.moveCursorRightBy(WORD_SPACING_PX)
         } else {
           // no, break it apart and loop again
           val maxChars = Math.floor(TextLayoutState.remainingWidthPx.toDouble() / CHARACTER_WIDTH_PX.toDouble())
@@ -164,11 +168,6 @@ object Layouter {
           wordsIterator.previous() // rewind iterator...
           wordsIterator.previous() // ...to point to left part.
         }
-      }
-
-      // Space between words, if possible
-      if (WORD_SPACING_PX <= TextLayoutState.remainingWidthPx) {
-        TextLayoutState.moveCursorRightBy(WORD_SPACING_PX)
       }
     }
   }
@@ -249,6 +248,7 @@ object Layouter {
       textTiles = mutableListOf()
       val wrapperBlock = AnonymousBlockTile(
         width = parentBlock.width - parentBlock.leftPadding - parentBlock.rightPadding,
+        x = parentBlock.x + parentBlock.leftPadding,
         y = parentBlock.y + parentBlock.height - parentBlock.bottomPadding,
         children = textTiles
       )
