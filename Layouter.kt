@@ -100,8 +100,8 @@ object Layouter {
     )
 
     // Destroy text wrapper tile if present
-    if (TextLayoutState.wrapperBlock != null) {
-      TextLayoutState.wrapperBlock = null
+    if (Text.wrapperBlock != null) {
+      Text.wrapperBlock = null
     }
 
     // Attach myself as parent's child
@@ -125,8 +125,8 @@ object Layouter {
   fun layoutTextNode(node: TextNode, parentBlock: AnonymousBlockTile) {
 
     // Create wrapper tile if not present
-    if (!TextLayoutState.inProgress()) {
-      TextLayoutState.beginTextBlock(parentBlock)
+    if (!Text.inProgress()) {
+      Text.beginTextBlock(parentBlock)
     }
 
     /*
@@ -134,32 +134,29 @@ object Layouter {
      Note that an Iterator is required here to be able to modify the list of words
      while iterating.
      */
-    val wordsIterator = node.text().split(Regex("\\s+")).toMutableList().listIterator()
+    var wordsIterator = node.text().split(Regex("\\s+")).toMutableList().filter { it != "" }.toMutableList().listIterator()
     while (wordsIterator.hasNext()) {
       val word = wordsIterator.next()
 
       // Does the current word fit onto the line?
       val wordWidthPx = stringWidthPx(word)
-      if (wordWidthPx <= TextLayoutState.remainingWidthPx) {
-        // Yes, position the word (growing the container if it's the first word on the line)
-        if (TextLayoutState.lineEmpty) TextLayoutState.growContentHeight(LINE_SPACING_PX)
-        TextLayoutState.addTextTile(word, node)
+      if (Text.fits(wordWidthPx)) {
+        // Yes, position the word
+        Text.addTextTile(word, node)
         // Space between words, if possible
-        if (WORD_SPACING_PX <= TextLayoutState.remainingWidthPx) TextLayoutState.moveCursorRightBy(WORD_SPACING_PX)
+        if (Text.fits(WORD_SPACING_PX)) Text.moveCursorRightBy(WORD_SPACING_PX)
       } else {
         // No, insert a line break
-        TextLayoutState.newline()
-
+        Text.newline()
         // Does the word fit now?
-        if (wordWidthPx <= TextLayoutState.remainingWidthPx) {
-          // Yes, position the word (growing the container if it's the first word on the line)
-          if (TextLayoutState.lineEmpty) TextLayoutState.growContentHeight(LINE_SPACING_PX)
-          TextLayoutState.addTextTile(word, node)
+        if (Text.fits(wordWidthPx)) {
+          // Yes, position the word
+          Text.addTextTile(word, node)
           // Space between words, if possible
-          if (WORD_SPACING_PX <= TextLayoutState.remainingWidthPx) TextLayoutState.moveCursorRightBy(WORD_SPACING_PX)
+          if (Text.fits(WORD_SPACING_PX)) Text.moveCursorRightBy(WORD_SPACING_PX)
         } else {
           // no, break it apart and loop again
-          val maxChars = Math.floor(TextLayoutState.remainingWidthPx.toDouble() / CHARACTER_WIDTH_PX.toDouble())
+          val maxChars = Math.floor(Text.remainingWidthPx.toDouble() / CHARACTER_WIDTH_PX.toDouble())
           val leftPart = word.substring(0, maxChars.toInt())
           val rightPart = word.substring(maxChars.toInt())
           wordsIterator.remove() // Remove word which is too long
@@ -176,8 +173,8 @@ object Layouter {
     val element = node as Element
 
     // Which format element is it?
-    if (element.tagName() == "b") TextLayoutState.setBold() // bold
-    else if (element.tagName() == "i") TextLayoutState.setItalic() // italic
+    if (element.tagName() == "b") Text.setBold() // bold
+    else if (element.tagName() == "i") Text.setItalic() // italic
 
     // Lay out children
     for (childNode in node.childNodes()) {
@@ -185,8 +182,8 @@ object Layouter {
     }
 
     // Unset formatting
-    if (element.tagName() == "b") TextLayoutState.unsetBold() // bold
-    else if (element.tagName() == "i") TextLayoutState.unsetItalic() // italic
+    if (element.tagName() == "b") Text.unsetBold() // bold
+    else if (element.tagName() == "i") Text.unsetItalic() // italic
 
   }
 
@@ -222,7 +219,7 @@ object Layouter {
   /**
    * Captures the state for text layout
    */
-  object TextLayoutState {
+  object Text {
     var textTiles: MutableList<Tile> = mutableListOf() // This holds the text tiles we're creating in a text block
     var wrapperBlock: AnonymousBlockTile? = null
     var parentBlock: AnonymousBlockTile? = null
@@ -252,9 +249,9 @@ object Layouter {
         y = parentBlock.y + parentBlock.height - parentBlock.bottomPadding,
         children = textTiles
       )
-      TextLayoutState.wrapperBlock = wrapperBlock
+      Text.wrapperBlock = wrapperBlock
       parentBlock.children.add(wrapperBlock)
-      TextLayoutState.parentBlock = parentBlock
+      Text.parentBlock = parentBlock
       cursorX = 0
       cursorY = 0
       remainingWidthPx = wrapperBlock.width - wrapperBlock.leftPadding - wrapperBlock.rightPadding
@@ -268,9 +265,10 @@ object Layouter {
     }
 
     fun addTextTile(text: String, node: Node) {
+      // Grow the container if this is the first word on the line
       val textTile = TextTile(
-        x = TextLayoutState.cursorX + (parentBlock?.x ?:0) + (parentBlock?.leftPadding ?:0),
-        y = TextLayoutState.cursorY + (parentBlock?.y ?:0) + (parentBlock?.topPadding ?:0),
+        x = Text.cursorX + (parentBlock?.x ?:0) + (parentBlock?.leftPadding ?:0),
+        y = Text.cursorY + (parentBlock?.y ?:0) + (parentBlock?.topPadding ?:0),
         width = stringWidthPx(text),
         height = LINE_HEIGHT_PX,
         node = node,
@@ -279,13 +277,18 @@ object Layouter {
         italic = isItalic()
       )
       textTiles.add(textTile)
-      lineEmpty = false
       moveCursorRightBy(stringWidthPx(text))
+      if (lineEmpty) growContentHeight(LINE_SPACING_PX)
+      lineEmpty = false
     }
 
     fun moveCursorRightBy(px: Int) {
       cursorX += px
       remainingWidthPx -= px
+    }
+
+    fun fits(widthPx: Int): Boolean {
+      return (widthPx <= remainingWidthPx)
     }
 
     fun setBold() {

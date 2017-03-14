@@ -7,7 +7,7 @@ import org.jsoup.safety.Whitelist
 
 fun main(args: Array<String>) {
   // Read the example HTML file into a string
-  var html: String = U.readFile("test.html")
+  var html: String = U.readFile("test-two-paragraphs-with-contents.html")
 
   // Clean the HTML
   val whitelist = Whitelist
@@ -45,8 +45,8 @@ fun main(args: Array<String>) {
   )
   Layouter.layout(document, screen)
   for (tile in screen.children) {
-    ConsoleRenderer.render(tile)
     ImageRenderer.render(tile)
+    ConsoleRenderer.render(tile)
   }
   System.out.println("done.")
 }
