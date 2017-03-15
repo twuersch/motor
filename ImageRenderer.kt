@@ -17,6 +17,7 @@ object ImageRenderer {
     // Have a look here for reference: http://www.java2s.com/Code/Java/2D-Graphics-GUI/DrawanImageandsavetopng.htm
 
     // List all tiles, blocks and text separately
+    // TODO: depth is never used, remove
     var tilesAndDepths: MutableSet<Pair<Tile, Int>> = mutableSetOf()
     _render(tile, 0, tilesAndDepths)
 
@@ -35,9 +36,8 @@ object ImageRenderer {
     // Loop 1: Block tiles
     for (tileAndDepth in tilesAndDepths) {
       val tile = tileAndDepth.first
-      val depth = tileAndDepth.second
       if (tile is AnonymousBlockTile) {
-        graphics.color = depthToGrey(depth)
+        graphics.color = Color(0.0f, 0.0f, 0.0f, 0.06f)
         graphics.fillRect(tile.x, tile.y, tile.width, tile.height)
       }
     }
@@ -45,14 +45,13 @@ object ImageRenderer {
     // Loop 2: Text tiles
     for (tileAndDepth in tilesAndDepths) {
       val tile = tileAndDepth.first
-      val depth = tileAndDepth.second
       if (tile is TextTile) {
         if (renderTextBlocks){
-          graphics.color = depthToGrey(depth)
+          graphics.color = Color(0.0f, 0.5f, 0.0f, 0.06f)
           graphics.fillRect(tile.x, tile.y, tile.width, tile.height)
         }
         if (renderText) {
-          graphics.color = Color.BLACK
+          graphics.color = Color(0.0f, 0.0f, 0.0f, 0.5f)
           graphics.drawString(tile.text, tile.x, tile.y + ascent)
         }
       }
@@ -71,10 +70,5 @@ object ImageRenderer {
         _render(child, depth + 1, tilesAndDepths)
       }
     }
-  }
-
-  fun depthToGrey(depth: Int) : Color {
-    val rgbvalue = (1.0 - 0.06 * depth).toFloat()
-    return Color(rgbvalue, rgbvalue, rgbvalue)
   }
 }
