@@ -10,7 +10,8 @@ open class AnonymousBlockTile (
   var rightPadding: Int = 0,
   var bottomPadding: Int = 0,
   var leftPadding: Int = 0,
-  val children: MutableList<Tile> = mutableListOf()
+  val children: MutableList<Tile> = mutableListOf(),
+  val parent: AnonymousBlockTile?
 ) : Tile (
   x,
   y,
@@ -39,5 +40,6 @@ open class AnonymousBlockTile (
 
   fun growContentHeight(amount: Int) {
     contentHeight(contentHeight() + amount)
+    parent?.growContentHeight(amount)
   }
 }

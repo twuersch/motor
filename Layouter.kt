@@ -96,30 +96,18 @@ object Layouter {
       node = node,
       width = parentBlock.width - parentBlock.leftPadding - parentBlock.rightPadding,
       x = parentBlock.x + parentBlock.leftPadding,
-      y = parentBlock.y + parentBlock.height - parentBlock.bottomPadding
+      y = parentBlock.y + parentBlock.height - parentBlock.bottomPadding,
+      parent = parentBlock
     )
+    parentBlock.children.add(blockTile) // Attach myself as parent's child
+    parentBlock.growContentHeight(blockTile.height)
 
-    // Destroy text wrapper tile if present
-    if (Text.wrapperBlock != null) {
-      Text.wrapperBlock = null
-    }
-
-    // Attach myself as parent's child
-    parentBlock.children.add(blockTile)
+    Text.endTextBlock() // End text block
 
     // Lay out children nodes with this block tile as their parent
     for (childNode in node.childNodes()) {
       layout(childNode, blockTile)
     }
-
-    /*
-    - Measure content height by measuring the newly laid out children
-    - Set my content height
-    - Grow parent content height by my own height ((1)....or here)
-     */
-    val childrenTilesHeight = measureHeight(blockTile.children) // TODO: This might not even be necessary...
-    blockTile.contentHeight(childrenTilesHeight) // TODO:...because the text tiles grow the parent blocks from the inside out.
-    parentBlock.growContentHeight(blockTile.contentHeight())
   }
 
   fun layoutTextNode(node: TextNode, parentBlock: AnonymousBlockTile) {
@@ -134,7 +122,7 @@ object Layouter {
      Note that an Iterator is required here to be able to modify the list of words
      while iterating.
      */
-    var wordsIterator = node.text().split(Regex("\\s+")).toMutableList().filter { it != "" }.toMutableList().listIterator()
+    val wordsIterator = node.text().split(Regex("\\s+")).toMutableList().filter { it != "" }.toMutableList().listIterator()
     while (wordsIterator.hasNext()) {
       val word = wordsIterator.next()
 
@@ -202,7 +190,7 @@ object Layouter {
   data class Interval<out T>(val min: T, val max: T)
 
   fun measureYExtent(tiles: Collection<Tile>): Interval<Int> {
-    val minY = tiles.map{ tile -> tile.y}.min() ?: 0
+    val minY = tiles.map(Tile::y).min() ?: 0
     val maxY = tiles.map{ tile -> tile.y + tile.height }.max() ?: 0
     return Interval(minY, maxY)
   }
@@ -247,6 +235,7 @@ object Layouter {
         width = parentBlock.width - parentBlock.leftPadding - parentBlock.rightPadding,
         x = parentBlock.x + parentBlock.leftPadding,
         y = parentBlock.y + parentBlock.height - parentBlock.bottomPadding,
+        parent = parentBlock,
         children = textTiles
       )
       Text.wrapperBlock = wrapperBlock
@@ -265,7 +254,7 @@ object Layouter {
     }
 
     fun addTextTile(text: String, node: Node) {
-      // Grow the container if this is the first word on the line
+      if (lineEmpty) wrapperBlock?.growContentHeight(LINE_SPACING_PX) // Grow the container if this is the first word on the line
       val textTile = TextTile(
         x = Text.cursorX + (parentBlock?.x ?:0) + (parentBlock?.leftPadding ?:0),
         y = Text.cursorY + (parentBlock?.y ?:0) + (parentBlock?.topPadding ?:0),
@@ -277,9 +266,8 @@ object Layouter {
         italic = isItalic()
       )
       textTiles.add(textTile)
-      moveCursorRightBy(stringWidthPx(text))
-      if (lineEmpty) growContentHeight(LINE_SPACING_PX)
       lineEmpty = false
+      moveCursorRightBy(stringWidthPx(text))
     }
 
     fun moveCursorRightBy(px: Int) {
@@ -287,33 +275,27 @@ object Layouter {
       remainingWidthPx -= px
     }
 
-    fun fits(widthPx: Int): Boolean {
-      return (widthPx <= remainingWidthPx)
-    }
+    fun fits(widthPx: Int): Boolean = (widthPx <= remainingWidthPx)
 
     fun setBold() {
-      bold = bold + 1
+      bold += 1
     }
 
     fun unsetBold() {
       bold = Math.max(0, bold - 1)
     }
 
-    fun isBold(): Boolean {
-      return bold > 0
-    }
+    fun isBold(): Boolean = bold > 0
 
     fun setItalic() {
-      italic = italic + 1
+      italic += 1
     }
 
     fun unsetItalic() {
       italic = Math.max(0, italic - 1)
     }
 
-    fun isItalic(): Boolean {
-      return italic > 0
-    }
+    fun isItalic(): Boolean = italic > 0
 
     fun newline() {
       cursorX = 0
@@ -322,11 +304,6 @@ object Layouter {
       - (parentBlock?.rightPadding ?: 0)
       cursorY += LINE_SPACING_PX
       lineEmpty = true
-    }
-
-    fun growContentHeight(amount: Int) {
-      parentBlock?.growContentHeight(amount)
-      wrapperBlock?.growContentHeight(amount)
     }
   }
 }

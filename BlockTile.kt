@@ -14,6 +14,7 @@ class BlockTile (
   bottomPadding: Int = 5,
   leftPadding: Int = 5,
   children: MutableList<Tile> = mutableListOf(),
+  parent: AnonymousBlockTile?,
   val node: Node
 ) : AnonymousBlockTile (
   x,
@@ -24,7 +25,8 @@ class BlockTile (
   rightPadding,
   bottomPadding,
   leftPadding,
-  children
+  children,
+  parent
 ) {
   override fun toString(): String {
     var additionalInfo = ""
