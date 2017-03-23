@@ -299,9 +299,9 @@ object Layouter {
 
     fun newline() {
       cursorX = 0
-      remainingWidthPx = (parentBlock?.width ?: 0)
-      - (parentBlock?.leftPadding ?: 0)
-      - (parentBlock?.rightPadding ?: 0)
+      remainingWidthPx = (wrapperBlock?.width ?: 0)
+      - (wrapperBlock?.leftPadding ?: 0)
+      - (wrapperBlock?.rightPadding ?: 0)
       cursorY += LINE_SPACING_PX
       lineEmpty = true
     }

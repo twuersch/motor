@@ -8,22 +8,28 @@ import java.util.*
 import javax.imageio.ImageIO
 
 /**
+ * Renders the given root tile and its children as a PNG file.
+ *
+ * Java2D stuff taken mostly from
+ * http://www.java2s.com/Code/Java/2D-Graphics-GUI/DrawanImageandsavetopng.htm
+ *
+ * @param rootTile The root tile.
+ * @param renderText Display text. Default `true`.
+ * @param renderTextBlocks Show text tiles as blocks. Default `true`.
+ *
  * Created by timo on 17.02.17.
  */
 object ImageRenderer {
 
-  fun render(tile: Tile, renderText: Boolean = true, renderTextBlocks: Boolean = true) {
+  fun render(rootTile: Tile, renderText: Boolean = true, renderTextBlocks: Boolean = true) {
 
-    // Have a look here for reference: http://www.java2s.com/Code/Java/2D-Graphics-GUI/DrawanImageandsavetopng.htm
 
-    // List all tiles, blocks and text separately
-    // TODO: depth is never used, remove
-    var tilesAndDepths: MutableSet<Pair<Tile, Int>> = mutableSetOf()
-    _render(tile, 0, tilesAndDepths)
+    var tiles: MutableSet<Tile> = mutableSetOf()
+    collectAllTiles(rootTile, tiles)
 
     // Get dimensions
-    val width = tilesAndDepths.map{ it.first.x + it.first.width }.max() ?: 0
-    val height = tilesAndDepths.map{ it.first.y + it.first.height }.max() ?: 0
+    val width = tiles.map{ it.x + it.width }.max() ?: 0
+    val height = tiles.map{ it.y + it.height }.max() ?: 0
 
     // Set up image and font
     val image = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
@@ -34,8 +40,7 @@ object ImageRenderer {
     graphics.font = font
 
     // Loop 1: Block tiles
-    for (tileAndDepth in tilesAndDepths) {
-      val tile = tileAndDepth.first
+    for (tile in tiles) {
       if (tile is AnonymousBlockTile) {
         graphics.color = Color(0.0f, 0.0f, 0.0f, 0.06f)
         graphics.fillRect(tile.x, tile.y, tile.width, tile.height)
@@ -43,8 +48,7 @@ object ImageRenderer {
     }
 
     // Loop 2: Text tiles
-    for (tileAndDepth in tilesAndDepths) {
-      val tile = tileAndDepth.first
+    for (tile in tiles) {
       if (tile is TextTile) {
         if (renderTextBlocks){
           graphics.color = Color(0.0f, 0.5f, 0.0f, 0.06f)
@@ -59,15 +63,15 @@ object ImageRenderer {
 
     // Write image
     val dateString = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(Calendar.getInstance().time)
-    ImageIO.write(image, "PNG", File("out-" + dateString + ".png"))
+    ImageIO.write(image, "PNG", File("out-$dateString.png"))
     println("ImageRenderer done.")
   }
 
-  fun _render(tile: Tile, depth: Int, tilesAndDepths: MutableSet<Pair<Tile, Int>>) {
-    tilesAndDepths.add(Pair(tile, depth))
+  fun collectAllTiles(tile: Tile, tiles: MutableSet<Tile>) {
+    tiles.add(tile)
     if (tile is AnonymousBlockTile) {
       for (child in tile.children) {
-        _render(child, depth + 1, tilesAndDepths)
+        collectAllTiles(child, tiles)
       }
     }
   }
