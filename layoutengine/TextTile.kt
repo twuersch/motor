@@ -1,3 +1,5 @@
+package layoutengine
+
 import org.jsoup.nodes.Node
 
 /**
@@ -12,7 +14,7 @@ class TextTile (
   val text: String = "",
   val bold: Boolean = false,
   val italic: Boolean = false
-) : Tile (
+) : Tile(
   x,
   y,
   width,
@@ -22,6 +24,6 @@ class TextTile (
     var additionalInfo = ""
     if (bold) additionalInfo += "B "
     if (italic) additionalInfo += "I "
-    return "TextTile x$x y$y w$width h$height '$text' $additionalInfo"
+    return "layoutengine.TextTile x$x y$y w$width h$height '$text' $additionalInfo"
   }
 }

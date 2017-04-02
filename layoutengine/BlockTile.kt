@@ -1,3 +1,6 @@
+package layoutengine
+
+import layoutengine.AnonymousBlockTile
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.Node
 
@@ -16,7 +19,7 @@ class BlockTile (
   children: MutableList<Tile> = mutableListOf(),
   parent: AnonymousBlockTile?,
   val node: Node
-) : AnonymousBlockTile (
+) : AnonymousBlockTile(
   x,
   y,
   width,
@@ -39,6 +42,6 @@ class BlockTile (
       "p$topPadding"
     else
       "p$topPadding $rightPadding $bottomPadding $leftPadding"
-    return "BlockTile x$x y$y w$width h$height $paddingInfo c$childrenCount $additionalInfo"
+    return "layoutengine.BlockTile x$x y$y w$width h$height $paddingInfo c$childrenCount $additionalInfo"
   }
 }

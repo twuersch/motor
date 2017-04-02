@@ -1,3 +1,5 @@
+package layoutengine
+
 /**
  * Created by timo on 01.01.17.
  */
@@ -12,7 +14,7 @@ open class AnonymousBlockTile (
   var leftPadding: Int = 0,
   val children: MutableList<Tile> = mutableListOf(),
   val parent: AnonymousBlockTile?
-) : Tile (
+) : Tile(
   x,
   y,
   width,
@@ -27,7 +29,7 @@ open class AnonymousBlockTile (
       "p$topPadding"
     else
       "p$topPadding $rightPadding $bottomPadding $leftPadding"
-    return "AnonymousBlockTile x$x y$y w$width h$height $paddingInfo c$childrenCount"
+    return "layoutengine.AnonymousBlockTile x$x y$y w$width h$height $paddingInfo c$childrenCount"
   }
 
   fun contentHeight(): Int {

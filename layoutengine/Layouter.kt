@@ -1,3 +1,6 @@
+package layoutengine
+
+import layoutengine.AnonymousBlockTile
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.Node
 import org.jsoup.nodes.TextNode
@@ -245,7 +248,7 @@ object Layouter {
       cursorY = 0
       remainingWidthPx = wrapperBlock.width - wrapperBlock.leftPadding - wrapperBlock.rightPadding
       bold = 0
-      italic= 0
+      italic = 0
       lineEmpty = true
     }
 
@@ -256,8 +259,8 @@ object Layouter {
     fun addTextTile(text: String, node: Node) {
       if (lineEmpty) wrapperBlock?.growContentHeight(LINE_SPACING_PX) // Grow the container if this is the first word on the line
       val textTile = TextTile(
-        x = Text.cursorX + (parentBlock?.x ?:0) + (parentBlock?.leftPadding ?:0),
-        y = Text.cursorY + (parentBlock?.y ?:0) + (parentBlock?.topPadding ?:0),
+        x = cursorX + (parentBlock?.x ?:0) + (parentBlock?.leftPadding ?:0),
+        y = cursorY + (parentBlock?.y ?:0) + (parentBlock?.topPadding ?:0),
         width = stringWidthPx(text),
         height = LINE_HEIGHT_PX,
         node = node,
